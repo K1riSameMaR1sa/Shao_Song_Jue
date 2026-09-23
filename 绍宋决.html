@@ -127,6 +127,8 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
   .menu-btn{padding:12px 16px;font-size:14px;width:100%}
   .action-btn{padding:8px 12px;font-size:12px}
   .hand-row{overflow-x:auto;flex-wrap:nowrap}
+  .hand-row .card-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .hand-row .card{flex-shrink:0}
   #game-screen{padding:8px}
   .player-bar{padding:6px 10px;font-size:12px}
   #log-panel{font-size:10px}
@@ -803,6 +805,24 @@ function logMsg(s){
     panel.style.bottom='auto';
   };
   document.onmouseup=()=>{dragging=false;};
+  /* 触摸支持 */
+  bar.ontouchstart=(e)=>{
+    if(e.target===toggle)return;
+    dragging=true;
+    const t=e.touches[0];
+    const r=panel.getBoundingClientRect();
+    offX=t.clientX-r.left;offY=t.clientY-r.top;
+    panel.style.right='auto';
+  };
+  document.ontouchmove=(e)=>{
+    if(!dragging)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    panel.style.left=Math.max(0,t.clientX-offX)+'px';
+    panel.style.top=Math.max(0,t.clientY-offY)+'px';
+    panel.style.bottom='auto';
+  };
+  document.ontouchend=()=>{dragging=false;};
 })();
 
 let pendingGameConfig=null;
