@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绍宋决 · 两宋风云卡牌对战</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238b1a1a'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23f5e6c8' font-family='serif' font-weight='bold'%3E宋%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f0e4c8;--paper-deep:#e2d0a8;--ink:#2a1f14;--ink-soft:#4a3a28;
+  --zhu:#b8232f;--zhu-deep:#7a1520;          /* 宋 · 赤红 */
+  --jin-gold:#c9a227;--jin-gold-deep:#8a6d10; /* 金 · 金黄 */
+  --xuan:#1a1a2e;--xuan-deep:#0f0f1e;
+  --tie:#b8860b;--tie-soft:#d4a84b;
+  --dali-purple:#6b3a7a;--dali-purple-deep:#42224d; /* 大理 · 紫 */
+  --xixia-green:#4a7c59;--xixia-green-deep:#2d4f38; /* 西夏 · 绿 */
+  --neutral-blue:#2c5f8f;--neutral-blue-deep:#1a3a5a; /* 中立 · 蓝 */
+  --pink:#c97b8a;--pink-deep:#8a4a58;         /* 后宫 · 粉 */
+  --hui:#6b6157;
+  --shadow:0 4px 12px rgba(42,31,20,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Noto Serif SC',serif;background:radial-gradient(ellipse at 20% 10%,rgba(139,26,26,.08),transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(26,26,46,.08),transparent 50%),var(--paper);color:var(--ink);overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:var(--tie);border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+
+#menu-screen{background:linear-gradient(rgba(240,228,200,.92),rgba(240,228,200,.96)),repeating-linear-gradient(45deg,transparent 0 20px,rgba(139,26,26,.03) 20px 40px)}
+.title-seal{font-size:88px;font-weight:900;color:var(--zhu);letter-spacing:12px;text-indent:12px;text-shadow:3px 3px 0 var(--paper-deep),6px 6px 0 rgba(139,26,26,.15);margin-bottom:8px}
+.subtitle{font-size:18px;color:var(--ink-soft);letter-spacing:6px;margin-bottom:36px}
+.menu-buttons{display:flex;flex-direction:column;gap:14px;width:340px}
+.menu-btn{padding:14px 24px;font-size:17px;letter-spacing:4px;background:var(--zhu);color:var(--paper);border:2px solid var(--zhu-deep);box-shadow:var(--shadow);transition:transform .15s}
+.menu-btn:hover{transform:translateY(-2px)}
+.menu-btn.secondary{background:var(--ink);border-color:var(--ink-soft)}
+.menu-btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.version-tag{position:absolute;bottom:16px;font-size:12px;color:var(--hui);letter-spacing:2px}
+
+.faction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:min(680px,90vw)}
+.faction-card{padding:18px 12px;background:var(--paper-deep);border:2px solid var(--ink);cursor:pointer;text-align:center;transition:transform .15s}
+.faction-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.faction-card h3{font-size:18px;margin-bottom:6px;letter-spacing:3px}
+.faction-card p{font-size:11px;color:var(--ink-soft);line-height:1.5}
+.faction-card.f-song{border-top:6px solid var(--zhu)}
+.faction-card.f-jin{border-top:6px solid var(--xuan)}
+.faction-card.f-xixia{border-top:6px solid var(--xixia)}
+.faction-card.f-dali{border-top:6px solid var(--dali)}
+
+.room-panel{background:var(--paper-deep);padding:28px;border:2px solid var(--tie);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px;min-width:340px}
+.room-panel h2{font-size:22px;letter-spacing:4px;color:var(--zhu);text-align:center}
+.room-panel input{padding:12px;font-size:20px;text-align:center;letter-spacing:8px;font-family:inherit;border:2px solid var(--ink);background:var(--paper)}
+.room-row{display:flex;gap:12px}
+.room-row button{flex:1;padding:12px;font-size:14px;letter-spacing:2px}
+
+#game-screen{padding:0}
+.battlefield{width:100%;max-width:1400px;height:100%;display:grid;grid-template-rows:auto auto auto auto auto auto auto;gap:5px;padding:6px}
+.player-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:var(--paper-deep);border:1px solid var(--ink-soft);border-radius:3px}
+.player-bar.enemy{background:linear-gradient(90deg,rgba(26,26,46,.12),var(--paper-deep))}
+.player-name{font-size:15px;font-weight:700;letter-spacing:2px}
+.faction-tag{font-size:11px;margin-left:8px;padding:2px 8px;border-radius:2px;color:var(--paper)}
+.f-tag-song{background:var(--zhu)}.f-tag-jin{background:var(--jin-gold);color:#000}.f-tag-qi{background:var(--hui)}.f-tag-xixia{background:var(--xixia-green)}.f-tag-dali{background:var(--dali-purple)}.f-tag-neutral{background:var(--neutral-blue)}.f-tag-pink{background:var(--pink)}
+.player-stats{display:flex;gap:12px;align-items:center;font-size:13px}
+.stat-pill{padding:3px 10px;border-radius:12px;background:var(--paper);border:1px solid var(--ink-soft);font-weight:700;min-width:56px;text-align:center}
+.stat-life{color:var(--zhu)}.stat-mana{color:var(--qing)}
+.zone-row{display:flex;gap:8px;align-items:center;min-height:92px;padding:6px 10px;background:rgba(255,255,255,.25);border:1px dashed var(--ink-soft);border-radius:3px}
+.zone-label{writing-mode:vertical-rl;font-size:11px;color:var(--hui);letter-spacing:3px;flex-shrink:0}
+.card-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:80px;flex:1}
+.hand-row{min-height:140px;background:rgba(139,26,26,.06);border-color:var(--zhu)}
+
+.card{width:92px;height:128px;flex-shrink:0;background:var(--paper);border:2px solid var(--ink);border-radius:5px;position:relative;cursor:pointer;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;user-select:none;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.card:hover{transform:translateY(-6px);box-shadow:0 8px 16px rgba(0,0,0,.3)}
+.card.selected{outline:3px solid var(--tie);transform:translateY(-10px)}
+.card.tapped{transform:rotate(8deg);filter:brightness(.8)}
+.card.disabled{opacity:.5;cursor:not-allowed}
+.card.targetable{outline:3px dashed var(--tie);cursor:crosshair}
+.card-cost{position:absolute;top:-6px;left:-6px;width:26px;height:26px;border-radius:50%;background:var(--qing);color:var(--paper);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--paper);z-index:2}
+.card-name{padding:4px 6px;font-size:11px;font-weight:700;text-align:center;line-height:1.2;background:var(--ink);color:var(--paper)}
+.card-art{flex:1;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:var(--paper);margin:4px;border-radius:2px;text-shadow:1px 1px 2px rgba(0,0,0,.5);letter-spacing:2px}
+.card-art.song{background:linear-gradient(135deg,var(--zhu),var(--zhu-deep))}
+.card-art.jin{background:linear-gradient(135deg,var(--jin-gold),var(--jin-gold-deep))}
+.card-art.qi{background:linear-gradient(135deg,var(--hui),#3a3530)}
+.card-art.xixia{background:linear-gradient(135deg,var(--xixia-green),var(--xixia-green-deep))}
+.card-art.dali{background:linear-gradient(135deg,var(--dali-purple),var(--dali-purple-deep))}
+.card-art.neutral{background:linear-gradient(135deg,var(--neutral-blue),var(--neutral-blue-deep))}
+.card-art.pink{background:linear-gradient(135deg,var(--pink),var(--pink-deep))}
+.card-art.stratagem{background:linear-gradient(135deg,var(--neutral-blue),var(--neutral-blue-deep))}
+.card-art.land{background:linear-gradient(135deg,#7a6a4a,#4a3f2a)}
+.card-type{font-size:9px;text-align:center;color:var(--hui);padding:1px}
+.card-text{font-size:9px;line-height:1.2;padding:2px 4px 14px;text-align:center;color:var(--ink-soft);min-height:28px}
+.card-stats{position:absolute;bottom:-6px;right:-6px;min-width:38px;padding:2px 6px;background:var(--tie);color:var(--ink);font-size:13px;font-weight:900;text-align:center;border:2px solid var(--paper);border-radius:3px}
+.card-bond{position:absolute;top:-6px;right:-6px;font-size:10px;background:var(--dali);color:#fff;padding:1px 5px;border-radius:2px;border:1px solid var(--paper)}
+.card.back{background:repeating-linear-gradient(45deg,var(--zhu) 0 6px,var(--zhu-deep) 6px 12px);cursor:default}
+.card.back:hover{transform:none}
+.card.back::after{content:"绍宋";color:var(--paper);font-size:14px;font-weight:900;letter-spacing:4px;text-indent:4px;writing-mode:vertical-rl}
+.hand-row .card{width:108px;height:148px}
+.hand-row .card-text{font-size:10px;min-height:32px}
+.hand-row .card-art{font-size:26px}
+
+.console{display:flex;gap:10px;align-items:center;justify-content:center;padding:8px;background:var(--ink);color:var(--paper);border-radius:3px;flex-wrap:wrap}
+.turn-label{font-size:14px;letter-spacing:3px}
+.action-btn{padding:10px 22px;font-size:14px;font-weight:700;letter-spacing:3px;background:var(--tie);color:var(--ink);border:2px solid var(--zhu)}
+.action-btn:hover{background:var(--tie-soft)}
+.action-btn:disabled{opacity:.4;cursor:not-allowed}
+.action-btn.danger{background:var(--zhu);color:var(--paper)}
+.action-btn.ghost{background:transparent;color:var(--paper);border-color:var(--paper)}
+
+.log-box{height:60px;overflow-y:auto;padding:6px 12px;background:rgba(42,31,20,.9);color:var(--paper);font-size:11px;line-height:1.5;font-family:monospace;border-radius:3px}
+.log-box p{margin:0}
+.log-box .hl{color:var(--tie-soft)}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:24px}
+.overlay.active{display:flex}
+.overlay h1{font-size:64px;color:var(--tie);letter-spacing:12px;text-indent:12px}
+
+@media (max-width:900px){
+  .title-seal{font-size:56px;letter-spacing:8px}
+  .card{width:72px;height:100px}
+  .hand-row .card{width:84px;height:118px}
+  .card-art{font-size:18px}
+  .card-name{font-size:10px}
+  .card-text{font-size:8px}
+  .zone-row{min-height:74px}.hand-row{min-height:108px}
+}
+</style>
+</head>
+<body>
+
+<!-- 主菜单 -->
+<div id="menu-screen" class="screen active">
+  <div class="title-seal">绍宋决</div>
+  <div class="subtitle">五 国 风 云 · 卡 牌 对 决</div>
+  <div class="menu-buttons">
+    <button class="menu-btn" onclick="showFactionSelect()">孤军抗金 · 随机预组</button>
+    <button class="menu-btn secondary" onclick="openDeckBuilder()">整军经武 · 自定义牌组</button>
+    <button class="menu-btn ghost" onclick="showOnlineMenu()">千里连线 · 在线对战</button>
+    <button class="menu-btn" onclick="showCodex()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">开卷有益 · 卡牌图鉴</button>
+    <button class="menu-btn" onclick="showReplays()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">对局录像</button>
+    <button class="menu-btn" onclick="showFactions()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">阵营特性</button>
+    <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
+    <button class="menu-btn" onclick="showHowto()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏说明</button>
+  </div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v7</div>
+</div>
+
+<!-- 图鉴 -->
+<div id="codex-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:1200px;height:100%;display:flex;flex-direction:column;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="letter-spacing:4px">卡 牌 图 鉴</h2>
+      <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="codex-filter"></div>
+    <div id="codex-grid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;align-content:start;padding-right:8px"></div>
+  </div>
+</div>
+
+<!-- 阵营特性 -->
+<div id="faction-info-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:900px;height:100%;display:flex;flex-direction:column;padding:20px;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="letter-spacing:4px">阵 营 颜 色 轮</h2>
+      <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+    </div>
+    <div style="width:100%;max-width:500px;margin:0 auto 20px;background:var(--paper-deep);border-radius:8px;padding:20px">
+      <div style="text-align:center;font-size:13px;font-weight:700;margin-bottom:12px">阵营相克环</div>
+      <svg viewBox="0 0 400 400" style="width:100%;height:auto">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-soft)"/></marker>
+        </defs>
+        <line x1="230" y1="70" x2="290" y2="130" stroke="#c0392b" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="320" y1="180" x2="300" y2="270" stroke="#d4a017" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="250" y1="320" x2="180" y2="330" stroke="#27ae60" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="130" y1="300" x2="100" y2="180" stroke="#8e44ad" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="175" y1="75" x2="95" y2="130" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4"/>
+        <line x1="310" y1="140" x2="290" y2="290" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4"/>
+        <line x1="275" y1="320" x2="145" y2="320" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4"/>
+        <line x1="90" y1="175" x2="185" y2="360" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4"/>
+        <!-- 中心：后宫粉（牵制所有阵营） -->
+        <circle cx="200" cy="200" r="30" fill="#e8a0bf" stroke="#c47" stroke-width="2"/>
+        <text x="200" y="205" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">后宫</text>
+        <line x1="200" y1="170" x2="200" y2="90" stroke="#e8a0bf" stroke-width="1" stroke-dasharray="2"/>
+        <line x1="225" y1="215" x2="310" y2="165" stroke="#e8a0bf" stroke-width="1" stroke-dasharray="2"/>
+        <line x1="220" y1="225" x2="290" y2="290" stroke="#e8a0bf" stroke-width="1" stroke-dasharray="2"/>
+        <line x1="180" y1="225" x2="130" y2="290" stroke="#e8a0bf" stroke-width="1" stroke-dasharray="2"/>
+        <line x1="175" y1="185" x2="95" y2="155" stroke="#e8a0bf" stroke-width="1" stroke-dasharray="2"/>
+        <circle cx="200" cy="60" r="24" fill="#c0392b"/><text x="200" y="65" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">宋</text>
+        <circle cx="330" cy="150" r="24" fill="#d4a017"/><text x="330" y="155" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">金</text>
+        <circle cx="300" cy="310" r="24" fill="#27ae60"/><text x="300" y="315" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">夏</text>
+        <circle cx="120" cy="310" r="24" fill="#8e44ad"/><text x="120" y="315" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">理</text>
+        <circle cx="70" cy="150" r="22" fill="#2980b9"/><text x="70" y="155" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">中</text>
+      </svg>
+      <div style="font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px">
+        <span style="color:#c0392b">━━</span> 相克　<span style="color:#2ecc71">┅┅</span> 相生　<span style="color:#e8a0bf">┄┄</span> 后宫牵制（返照/收牌）
+      </div>
+    </div>
+    <div id="faction-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
+  </div>
+</div>
+
+<!-- 游戏规则 -->
+<div id="rules-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:800px;height:100%;overflow-y:auto;padding:24px;line-height:1.8;font-size:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="letter-spacing:4px">游 戏 规 则</h2>
+      <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+    </div>
+    <h3 style="margin-top:20px">一、胜利条件</h3>
+    <p>将对手威望（生命）打到0，或对手牌库抽空。初始威望20。</p>
+    <h3>二、回合流程（点"下一阶段"推进）</h3>
+    <p>重置→维持→抽牌→<b>战前主阶段</b>（出牌下地）→战斗开始→<b>宣告攻击</b>（点将选目标）→宣告阻挡→结算伤害→战斗结束→<b>战后主阶段</b>（继续出牌）→结束回合→清除。</p>
+    <h3>三、费用系统</h3>
+    <p>州府（地）横置产1粮。每回合可下1张地。主阶段可点已横置的地取消产粮。</p>
+    <h3>四、颜色轮</h3>
+    <p><b>相克环</b>（实线箭头）：宋→金→夏→理→宋。攻击被克阵营时+1攻。</p>
+    <p><b>相生环</b>（绿色虚线）：宋↔中立、金↔夏、夏↔理、中立↔后宫。同场有盟友时+0/+1。</p>
+    <p><b>后宫居中</b>：粉线辐射牵制所有阵营，通过返照/弃牌/北狩影响各方。</p>
+    <h3>五、阵营特性</h3>
+    <p><b>宋（红）</b>：将攻击+1（士气）。关键词：死守（铁壁）、北伐（攻金+1）、敏捷。</p>
+    <p><b>金（金）</b>：破甲——超额伤害直接打玩家。关键词：铁浮屠（铁壁）、拐子马（敏捷）。</p>
+    <p><b>夏（绿）</b>：将敏捷——召唤当回合可攻。关键词：牧场（产粮）、游击（敏捷）。</p>
+    <p><b>理（紫）</b>：将攻击后挂-1/-1（蛊毒）。关键词：巫蛊、孔雀胆（穿喉）。</p>
+    <p><b>中立（蓝）</b>：灵活应变。关键词：斡旋、辞章（抽牌）、通商（产粮）。</p>
+    <p><b>后宫（粉）</b>：同场将+0/+1。关键词：返照（弹回手牌）、命令（弃牌）、北狩。</p>
+    <h3>六、关键词</h3>
+    <p><b>死守（ward/铁壁）</b>：第一次致命伤害被抵消。</p>
+    <p><b>穿喉（deathtouch/穿喉）</b>：造成的任意伤害即杀死对方。</p>
+    <p><b>奔袭（haste/敏捷）</b>：召唤当回合即可攻击。</p>
+    <p><b>据守（vigilance/警戒）</b>：攻击时不横置。</p>
+    <p><b>先发（first strike/先攻）</b>：先造成伤害，对方若死则打不回来。</p>
+    <p><b>威震（intimidate/威慑）</b>：只能被多阵营将阻挡。</p>
+    <p><b>殉国（death trigger）</b>：死亡时触发效果（抽牌/产粮/回血）。</p>
+    <p><b>陷阵（连击）</b>：可攻击两次。</p>
+    <p><b>强弩（延势）</b>：可阻挡敏捷将。</p>
+    <p><b>抚绥（系命）</b>：造成伤害时你回等量血。</p>
+    <p><b>破阵（践踏）</b>：超额伤害直接打玩家。</p>
+    <p><b>庙算</b>：使用计策时抽1牌。</p>
+    <p><b>营田</b>：横置产1粮。</p>
+    <p><b>血战</b>：自扣1血抽2牌。</p>
+    <p><b>反问</b>：令对手弃1牌。</p>
+    <p><b>纵横</b>：双方各换1牌。</p>
+    <p><b>勤王</b>：同场宋将+0/+2。</p>
+    <p><b>坚壁</b>：横置时+3防。</p>
+    <h3>七、卡牌类型</h3>
+    <p><b>将领</b>：攻防单位，可攻击可阻挡。<b>州府</b>：产粮地。<b>计策</b>：一次性效果。<b>衍生物</b>：由技能召唤（骑兵2/2敏捷、刀斧手2/3、弓箭手1/2穿喉、亲兵0/3铁壁）。</p>
+    <h3>八、地牌</h3>
+    <p>单色地产1粮。双色地可产两种色费。异国无色地：罗马（找地）、君士坦丁堡（-1血）、大食港（抽牌）、天竺（回血）。</p>
+  </div>
+</div>
+
+<!-- 录像回放 -->
+<div id="replay-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:800px;height:100%;display:flex;flex-direction:column;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="letter-spacing:4px">对 局 录 像</h2>
+      <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+    </div>
+    <div id="replay-list" style="flex:1;overflow-y:auto"></div>
+    <div id="replay-view" style="display:none;flex:1;flex-direction:column">
+      <button class="menu-btn ghost" style="padding:6px 16px;margin-bottom:8px;align-self:flex-start" onclick="showReplays()">← 返回列表</button>
+      <div id="replay-log" style="flex:1;overflow-y:auto;background:var(--paper-deep);padding:12px;border-radius:6px;font-size:13px;line-height:1.8"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 组牌器 -->
+<div id="builder-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:1400px;height:100%;display:flex;flex-direction:column;padding:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <h2 style="letter-spacing:4px">整 军 经 武</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="builder-count" style="font-size:14px;font-weight:700">0/60 张（地 0/22-24）</span>
+        <button class="menu-btn ghost" style="padding:8px 16px" onclick="clearDeck()">清空</button>
+        <button class="menu-btn ghost" style="padding:8px 16px" onclick="randomFill()">随机填满</button>
+        <button class="menu-btn" style="padding:8px 20px" onclick="playCustomDeck()">出师</button>
+        <button class="menu-btn ghost" style="padding:8px 16px" onclick="backToMenu()">返回</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;flex:1;overflow:hidden">
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap" id="builder-filter"></div>
+        <div id="builder-pool" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-content:start"></div>
+      </div>
+      <div style="width:260px;background:var(--paper-deep);border:1px solid var(--ink);padding:10px;overflow-y:auto;flex-shrink:0">
+        <h3 style="font-size:14px;letter-spacing:3px;margin-bottom:8px">本阵</h3>
+        <div id="builder-decklist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 选阵营 -->
+<div id="faction-screen" class="screen">
+  <h2 style="margin-bottom:20px;letter-spacing:6px">择 尔 阵 营</h2>
+  <div class="faction-grid" id="faction-grid"></div>
+  <p style="margin-top:20px;font-size:12px;color:var(--hui)" onclick="backToMenu()" class="menu-btn ghost" style="padding:8px 20px;cursor:pointer">返回</p>
+</div>
+
+<!-- 同屏双人 -->
+<div id="local-screen" class="screen">
+  <div class="room-panel">
+    <h2>同屏双人</h2>
+    <p style="text-align:center;font-size:13px;color:var(--ink-soft)">双方各选一阵营</p>
+    <div id="local-faction-pick"></div>
+    <button class="menu-btn ghost" onclick="backToMenu()">返回</button>
+  </div>
+</div>
+
+<!-- 联机 -->
+<div id="online-screen" class="screen">
+  <div class="room-panel">
+    <h2>在线联机</h2>
+    <p style="text-align:center;font-size:12px;color:var(--hui)">P2P 直连。房主建房，对手输房号。</p>
+    <button class="menu-btn" onclick="hostRoom()">创建房间</button>
+    <input id="room-input" placeholder="4 位房间号" maxlength="4">
+    <div class="room-row">
+      <button class="menu-btn secondary" onclick="joinRoom()">加入</button>
+      <button class="menu-btn ghost" onclick="backToMenu()">返回</button>
+    </div>
+    <p id="room-status" style="text-align:center;font-size:13px;min-height:20px;color:var(--zhu)"></p>
+  </div>
+</div>
+
+<!-- 猜先 -->
+<div id="card-tooltip" style="display:none;position:fixed;z-index:9999;width:260px;background:var(--paper-deep);border:2px solid var(--tie);border-radius:8px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;font-size:13px;line-height:1.5"></div>
+<div id="dice-screen" class="screen">
+  <div class="room-panel">
+    <h2>掷 骰 猜 先</h2>
+    <p style="text-align:center;font-size:13px;color:var(--ink-soft)">掷 d20，选大(11-20)或小(1-10)</p>
+    <div id="dice" style="width:100px;height:100px;margin:16px auto;background:var(--paper-deep);border:3px solid var(--tie);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;color:var(--zhu)">?</div>
+    <div class="room-row">
+      <button class="menu-btn" onclick="rollDice('low')">小 (1-10)</button>
+      <button class="menu-btn secondary" onclick="rollDice('high')">大 (11-20)</button>
+    </div>
+    <p id="dice-result" style="text-align:center;font-size:14px;min-height:20px;color:var(--zhu)"></p>
+  </div>
+</div>
+
+<!-- 战斗 -->
+<div id="game-screen" class="screen">
+  <div class="battlefield">
+    <div class="player-bar enemy">
+      <div class="player-name"><span id="enemy-name">对手</span><span class="faction-tag" id="enemy-faction-tag">金</span></div>
+      <div class="player-stats">
+        <span>牌库 <b id="enemy-deck">0</b></span>
+        <span class="stat-pill stat-life">威望 <span id="enemy-life">20</span></span>
+        <span class="stat-pill stat-mana">粮草 <span id="enemy-mana">0</span>/<span id="enemy-manamax">0</span></span>
+      </div>
+    </div>
+    <div class="zone-row"><div class="zone-label">州府</div><div class="card-row" id="enemy-lands"></div></div>
+    <div class="zone-row"><div class="zone-label">将帐</div><div class="card-row" id="enemy-board"></div></div>
+    <div class="console">
+      <span class="turn-label" id="turn-label">你的回合</span>
+      <button class="action-btn" id="attack-btn" onclick="onAttackBtn()">开战</button>
+      <button class="action-btn ghost" id="next-phase-btn" onclick="nextPhase()" style="font-size:12px">下一阶段 →</button>
+      <button class="action-btn" id="end-turn-btn" onclick="endTurn()">结束回合</button>
+      <button class="action-btn ghost" id="cancel-target-btn" onclick="cancelTarget()" style="display:none">取消选目标</button>
+      <button class="action-btn danger" onclick="quitGame()">投降</button>
+    </div>
+    <div class="zone-row">
+      <div class="zone-label">将帐</div><div class="card-row" id="my-board"></div>
+      <div class="zone-label">州府</div><div class="card-row" id="my-lands"></div>
+    </div>
+    <div class="zone-row hand-row"><div class="zone-label">手牌</div><div class="card-row" id="my-hand"></div></div>
+    <div class="player-bar">
+      <div class="player-name"><span id="my-name">赵官家</span><span class="faction-tag f-tag-song" id="my-faction-tag">宋</span></div>
+      <div class="player-stats">
+        <span>牌库 <b id="my-deck">0</b></span>
+        <span>弃牌堆 <b id="my-grave">0</b></span>
+        <span class="stat-pill stat-mana">粮草 <span id="my-mana">0</span>/<span id="my-manamax">0</span></span>
+        <span class="stat-pill stat-life">威望 <span id="my-life">20</span></span>
+      </div>
+    </div>
+  </div>
+  <div id="log-panel" style="position:fixed;bottom:0;left:0;right:0;z-index:100">
+    <div id="log-titlebar" style="height:22px;background:var(--ink);color:var(--paper);font-size:11px;padding:0 12px;cursor:move;display:flex;align-items:center;justify-content:space-between;user-select:none">
+      <span>战报</span>
+      <button id="log-toggle" style="background:none;border:none;color:var(--paper);cursor:pointer;font-size:11px">▾</button>
+    </div>
+    <div class="log-box" id="log-box" style="height:80px"></div>
+  </div>
+</div>
+
+<div id="end-overlay" class="overlay">
+  <h1 id="end-title">大捷</h1>
+  <p id="end-text"></p>
+  <button class="menu-btn" onclick="backToMenu()">再来一局</button>
+</div>
+
+<script>
+/* ============================================================
+ * 卡牌数据库 v2 — 五阵营 + 连携关系
+ * ============================================================ */
+const FACTIONS = {
+  song:  {name:'宋 · 红', tag:'宋', cls:'song', kw:'士气·动员·殉国'},
+  jin:   {name:'金 · 金', tag:'金', cls:'jin', kw:'破甲·铁壁·装备'},
+  qi:    {name:'伪齐', tag:'伪', cls:'qi', kw:'投机'},
+  xixia: {name:'西夏 · 绿', tag:'夏', cls:'xixia', kw:'牧场·敏捷·产粮'},
+  dali:  {name:'大理 · 紫', tag:'理', cls:'dali', kw:'蛊毒·巫术·削弱'},
+  neutral:{name:'中立 · 蓝', tag:'中', cls:'neutral', kw:'外交·谋略·抽牌'},
+  pink:  {name:'后宫 · 粉', tag:'宫', cls:'pink', kw:'宠冠·抚绥·殉节'},
+};
+
+const FACTION_POWERS = {
+  song:  '宋将攻击时+1攻（士气）；相生：与中立同场+0/+1；相克：攻金将+1',
+  jin:   '金将破甲：超额伤害直接打玩家；相生：与夏同场+0/+1；相克：攻夏将+1',
+  xixia: '夏将敏捷：召唤当回合即可攻击；相生：与金/理同场+0/+1；相克：攻理将+1',
+  dali:  '理将攻击后挂-1/-1（蛊毒）；相生：与夏同场+0/+1；相克：攻宋将+1',
+  neutral:'中立将无加成；相生：与宋/后宫同场+0/+1',
+  pink:  '后妃光环：同场将+0/+1；相生：与中立同场+0/+1',
+  qi:    '伪齐将无加成，见风使舵',
+};
+// 相克：克方→被克方
+const FACTION_COUNTER={song:'jin',jin:'xixia',xixia:'dali',dali:'song'};
+// 相生：盟友阵营列表
+const FACTION_ALLIES={song:['neutral'],jin:['xixia'],xixia:['jin','dali'],dali:['xixia'],neutral:['song','pink'],pink:['neutral']};
+
+const CARD_DB = {
+  /* ===== 宋将 ===== */
+  zhaojiu:   {name:"赵玖", type:"unit", faction:"song", cost:3, atk:2, def:3, text:"御驾：我方全体将+1/+1", power:"lord_song"},
+  yuefei:    {name:"岳飞", type:"unit", faction:"song", cost:4, atk:4, def:4, text:"北伐：敏捷；先发；攻金将+1", power:"haste;first_strike;counter_jin"},
+  han_shizhong:{name:"韩世忠",type:"unit",faction:"song",cost:3,atk:3,def:4,text:"黄天荡：列阵（警戒）；与梁红玉同场+1/+0；攻金将+1", power:"vigilance;counter_jin"},
+  zhangjun:  {name:"张俊", type:"unit", faction:"song", cost:3, atk:2, def:4, text:"死守：铁壁", power:"ward"},
+  liyanxian: {name:"李彦仙", type:"unit", faction:"song", cost:4, atk:3, def:5, text:"陕州柱石：铁壁；攻金将+1", power:"ward;counter_jin"},
+  quduan:    {name:"曲端", type:"unit", faction:"song", cost:3, atk:3, def:3, text:"西军悍将：敏捷", power:"haste"},
+  wujie:     {name:"吴玠", type:"unit", faction:"song", cost:4, atk:4, def:4, text:"登场抽1；死守（铁壁）", power:"draw1_etb;ward"},
+  wangyan:   {name:"王彦", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"八字军：穿喉", power:"deathtouch"},
+  zhangrong: {name:"张荣", type:"unit", faction:"song", cost:3, atk:3, def:3, text:"梁山泊：登场召刀斧手", power:"token_etb_ax"},
+  yangyizhong:{name:"杨沂中",type:"unit",faction:"song",cost:2,atk:2,def:2,text:"御前班直：铁壁",power:"ward"},
+  wangde:    {name:"王德", type:"unit", faction:"song", cost:3, atk:3, def:2, text:"王夜叉：敏捷", power:"haste"},
+  liqiong:   {name:"郦琼", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"汜水关：铁壁", power:"ward"},
+  zongze:    {name:"宗泽", type:"unit", faction:"song", cost:5, atk:3, def:6, text:"东京留守：宋将+0/+1", power:"lord_tough"},
+  ligang:    {name:"李纲", type:"unit", faction:"song", cost:4, atk:2, def:5, text:"主战旗帜：宋将攻击+1", power:"song_attack_boost"},
+  chenggui:  {name:"陈规", type:"unit", faction:"song", cost:2, atk:0, def:5, text:"守城专家：铁壁", power:"ward"},
+  liuqi:     {name:"刘錡", type:"unit", faction:"song", cost:3, atk:3, def:3, text:"顺昌之威：先发；攻金将+1", power:"first_strike;counter_jin"},
+  niugao:    {name:"牛皋", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"与岳飞同场+1/+0；敏捷", power:"haste"},
+  zhangxian: {name:"张宪", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"与岳飞同场+1/+1；敏捷", power:"haste"},
+  yunyunwen: {name:"虞允文", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"登场抽1", power:"draw1_etb"},
+  lianghongyu:{name:"梁红玉",type:"unit",faction:"song",cost:2,atk:2,def:3,text:"擂战鼓：列阵（警戒）；与韩世忠同场+0/+1", power:"vigilance"},
+  wulin:     {name:"吴璘", type:"unit", faction:"song", cost:2, atk:2, def:3, text:"与吴玠同场+1/+0；铁壁", power:"ward"},
+  liqingzhao:{name:"李清照",type:"unit",faction:"song",cost:2,atk:0,def:3,text:"易安居士：横置抽1牌", power:"tap_draw"},
+
+  /* ===== 金将 ===== */
+  wanyan_loushi:{name:"完颜娄室",type:"unit",faction:"jin",cost:5,atk:6,def:4,text:"金国第一将；与活女同场+2/+0", power:"double_strike"},
+  wanyan_wuzhu:{name:"完颜兀术",type:"unit",faction:"jin",cost:4,atk:5,def:3,text:"搜山检海：敏捷，登场召骑兵", power:"haste_token_cav"},
+  wanyan_talan:{name:"完颜挞懒",type:"unit",faction:"jin",cost:4,atk:4,def:4,text:"都元帅：铁壁", power:"ward"},
+  wanyan_zhanhan:{name:"完颜粘罕",type:"unit",faction:"jin",cost:5,atk:5,def:5,text:"国相权臣：攻夏将+1；铁壁", power:"counter_xixia;ward"},
+  wanyan_yinshuke:{name:"完颜银术可",type:"unit",faction:"jin",cost:3,atk:4,def:3,text:"太原名将：铁壁", power:"ward"},
+  wanyan_huonv:{name:"完颜活女",type:"unit",faction:"jin",cost:3,atk:3,def:3,text:"娄室长子：敏捷", power:"haste"},
+  wanyan_balishu:{name:"完颜拔离速",type:"unit",faction:"jin",cost:3,atk:3,def:2,text:"敏捷", power:"haste"},
+  hanchang:   {name:"韩常", type:"unit", faction:"jin", cost:3, atk:3, def:3, text:"燕云汉军：铁壁", power:"ward"},
+  yelvmawu:  {name:"耶律马五",type:"unit",faction:"jin",cost:2,atk:3,def:2,text:"敏捷", power:"haste"},
+  licheng:   {name:"李成", type:"unit", faction:"jin", cost:3, atk:3, def:3, text:"伪齐都督：敏捷", power:"haste"},
+  kongyanzhou:{name:"孔彦舟", type:"unit", faction:"jin", cost:3, atk:3, def:2, text:"伪齐元帅：敏捷", power:"haste"},
+  liuyu:     {name:"刘豫", type:"unit", faction:"qi", cost:4, atk:0, def:5, text:"伪齐帝：横置产1粮", power:"mana_dork"},
+  hongya:    {name:"洪涯", type:"unit", faction:"qi", cost:2, atk:1, def:3, text:"与秦桧同场时产1粮", power:null},
+  qinhui:    {name:"秦桧", type:"unit", faction:"qi", cost:2, atk:1, def:3, text:"与洪涯同场时产1粮", power:null},
+
+  /* ===== 西夏将 ===== */
+  liyuanhao: {name:"李元昊", type:"unit", faction:"xixia", cost:5, atk:5, def:5, text:"西夏武帝：夏将+1/+1；先发", power:"lord_xixia;first_strike"},
+  yeiliyu:   {name:"野利遇乞",type:"unit",faction:"xixia",cost:3,atk:3,def:3,text:"西夏名将：攻理将+1", power:"counter_dali"},
+  weiming:   {name:"嵬名郎君",type:"unit",faction:"xixia",cost:2,atk:2,def:2,text:"党项亲贵：敏捷", power:"haste"},
+  miezang:   {name:"没藏太后",type:"unit",faction:"xixia",cost:3,atk:1,def:4,text:"摄政：横置产1粮", power:"mana_dork"},
+  liangzuo:  {name:"李谅祚", type:"unit", faction:"xixia", cost:3, atk:3, def:2, text:"少主：敏捷", power:"haste"},
+
+  /* ===== 大理将 ===== */
+  duanheyu:  {name:"段和誉", type:"unit", faction:"dali", cost:4, atk:3, def:4, text:"大理宣宗：双方各回1血；抚绥（造成伤害回血）", power:"heal_both1_etb;lifelink"},
+  gaoguanyin:{name:"高观音", type:"unit", faction:"dali", cost:3, atk:3, def:3, text:"高氏权臣：攻宋将+1；穿喉", power:"counter_song;deathtouch"},
+  duan_zheng: {name:"段正严", type:"unit", faction:"dali", cost:2, atk:2, def:2, text:"天龙寺俗家：先发；攻宋将+1", power:"first_strike;counter_song"},
+
+  /* ===== 通用计策 ===== */
+  guozhai:   {name:"国债", type:"sorcery", faction:"neutral", cost:1, text:"抽2张", power:"draw2"},
+  baihe:     {name:"白河郊游图", type:"sorcery", faction:"song", cost:2, text:"名品：抽2牌，本回合将+1/+0", power:"draw2_buff_1_0"},
+  moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
+  qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
+  luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
+  hefeng:    {name:"和风细雨",type:"sorcery",faction:"neutral",cost:2,text:"回5血", power:"heal5"},
+  jianbi:    {name:"坚壁清野",type:"sorcery",faction:"neutral",cost:1,text:"本回合我方将+0/+2", power:"buff_board_0_2"},
+  xishui:    {name:"突袭水寨",type:"instant",faction:"neutral",cost:2,text:"瞬间：对一个敌将造3伤", power:"deal3_to_unit"},
+  tianming:  {name:"天命", type:"sorcery", faction:"neutral", cost:0, text:"立刻得2粮", power:"bonus_mana2"},
+  yihe:      {name:"和议", type:"sorcery", faction:"neutral", cost:1, text:"双方各抽1，回2血", power:"mutual_draw1_heal2"},
+  wugu:      {name:"巫蛊", type:"instant", faction:"dali", cost:1, text:"瞬间：目标将-1/-1直到回合结束", power:"weaken_1_1"},
+  kongquendan:{name:"孔雀胆",type:"instant",faction:"dali",cost:2,text:"瞬间：对一个将造2伤", power:"deal2_to_unit"},
+
+  /* ===== 宋方文臣/低阶将（新增） ===== */
+  lvhaowen:  {name:"吕好问", type:"unit", faction:"song", cost:3, atk:1, def:4, text:"首相：宋将+0/+1", power:"lord_tough"},
+  zhangjun2: {name:"张浚", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"心腹：登场抽1", power:"draw1_etb"},
+  zhaoding:  {name:"赵鼎", type:"unit", faction:"song", cost:3, atk:1, def:3, text:"守成：每回合-1粮损失", power:null},
+  moqixie:   {name:"万俟卨", type:"unit", faction:"song", cost:1, atk:1, def:2, text:"犯颜直谏", power:null},
+  liruoshui: {name:"李若水", type:"unit", faction:"song", cost:1, atk:0, def:3, text:"殉国：被消灭时对手-2威望", power:"death_damage2"},
+  lvyihao:   {name:"吕颐浩", type:"unit", faction:"song", cost:3, atk:2, def:3, text:"东南使相", power:null},
+  liangyangzu:{name:"梁扬祖",type:"unit",faction:"song",cost:1,atk:0,def:2,text:"扬州财赋：横置产1粮", power:"mana_dork"},
+  zhaokai:   {name:"赵开", type:"unit", faction:"song", cost:1, atk:0, def:2, text:"蜀地榷货：横置产1粮", power:"mana_dork"},
+  liuji:     {name:"刘汲", type:"unit", faction:"song", cost:2, atk:1, def:3, text:"都省副相", power:null},
+  huyin:     {name:"胡寅", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"主战：横置产1粮", power:"mana_dork"},
+  liuziyu:   {name:"刘子羽", type:"unit", faction:"song", cost:2, atk:1, def:3, text:"主守", power:null},
+  linjingmo: {name:"林景默", type:"unit", faction:"song", cost:1, atk:0, def:2, text:"内制：横置抽1", power:"tap_draw"},
+  liuyan:    {name:"刘晏", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"赤心队", power:null},
+  mabkuo:    {name:"马扩", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"五马义军", power:null},
+  zhaixing:  {name:"翟兴", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"洛阳义军", power:null},
+  liyongqi:  {name:"李永奇", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"党项归宋", power:null},
+  lishifu:   {name:"李世辅", type:"unit", faction:"song", cost:3, atk:3, def:2, text:"射伤娄室：对金将+2/+0", power:"vs_jin_buff"},
+  houdan:    {name:"侯丹", type:"unit", faction:"song", cost:3, atk:3, def:1, text:"斩娄室：敏捷", power:"haste"},
+  zhangyongzhen:{name:"张永珍",type:"unit",faction:"song",cost:2,atk:2,def:2,text:"淮河水神", power:null},
+  murongwei: {name:"慕容洧", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"秦凤将", power:null},
+  liyanqi:   {name:"李彦琪", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"熙河将", power:null},
+  jiaozetan: {name:"焦文通", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"八字军", power:null},
+  guansheng: {name:"关胜", type:"unit", faction:"song", cost:3, atk:3, def:2, text:"济南守将", power:null},
+  zhangsuo:  {name:"张所", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"殉国：被消灭时抽1", power:"death_draw1"},
+  wangyuan:  {name:"王渊", type:"unit", faction:"song", cost:3, atk:2, def:3, text:"御营都统", power:null},
+  yangweizhong:{name:"杨惟忠",type:"unit",faction:"song",cost:3,atk:2,def:3,text:"后军都统", power:null},
+  xujingheng:{name:"许景衡",type:"unit",faction:"song",cost:2,atk:1,def:2,text:"副相", power:null},
+  zhangque:  {name:"张悫", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"知枢密", power:null},
+  yanxiaozhong:{name:"阎孝忠",type:"unit",faction:"song",cost:2,atk:2,def:2,text:"南阳守", power:null},
+  wangdabao: {name:"王大宝", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"榜眼", power:null},
+  zhuanglei: {name:"赵伯琮", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"宗室状元", power:null},
+  liyi:      {name:"李易", type:"unit", faction:"song", cost:2, atk:1, def:2, text:"榜眼", power:null},
+  chaogongwu:{name:"晁公武",type:"unit",faction:"song",cost:1,atk:0,def:1,text:"藏书：登场抽1", power:"draw1_etb"},
+  huquan:    {name:"胡铨", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"太学生主战：横置抽1牌", power:"tap_draw"},
+  wanglun:   {name:"王伦", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"使臣", power:null},
+  hanxiaozhou:{name:"韩肖胄",type:"unit",faction:"song",cost:1,atk:1,def:1,text:"使金", power:null},
+  lvbenzhong:{name:"吕本中",type:"unit",faction:"song",cost:1,atk:0,def:1,text:"诗人", power:null},
+  chendong:  {name:"陈东", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"太学生", power:null},
+  ouyangche: {name:"欧阳澈", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"太学生", power:null},
+  libo:      {name:"李宝", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"水军统制", power:null},
+  xiaoen:    {name:"萧恩", type:"unit", faction:"song", cost:1, atk:1, def:1, text:"梁山泊", power:null},
+  zhangmaode:{name:"张懋德",type:"unit",faction:"song",cost:0,atk:0,def:1,text:"阳谷富商：横置产1粮", power:"mana_dork"},
+  panfeifei: {name:"潘贤妃", type:"unit", faction:"pink", cost:1, atk:0, def:1, text:"宠冠：宋将+0/+1", power:"lord_tough_minor"},
+  wuyu:      {name:"吴瑜", type:"unit", faction:"pink", cost:1, atk:1, def:1, text:"珍珠吴氏：敏捷", power:"haste"},
+  zhaoshi:   {name:"赵士㒟",type:"unit",faction:"song",cost:2,atk:1,def:3,text:"大宗正", power:null},
+  zhaomingcheng:{name:"赵明诚",type:"unit",faction:"song",cost:1,atk:0,def:2,text:"金石：与李清照同场+0/+1", power:null},
+  huangqianshan:{name:"黄潜善",type:"unit",faction:"song",cost:1,atk:0,def:2,text:"主和：回合开始-1粮", power:"tax_drain"},
+  wangboyan: {name:"汪伯彦", type:"unit", faction:"song", cost:1, atk:0, def:3, text:"自焚殉国：被消灭时抽1", power:"death_draw1"},
+  liuguangshi:{name:"刘光世",type:"unit",faction:"song",cost:2,atk:1,def:4,text:"畏战：不能攻击", power:"cant_attack"},
+  duchong:   {name:"杜充", type:"unit", faction:"song", cost:2, atk:0, def:4, text:"约和：不能攻击", power:"cant_attack"},
+  fanqiong:  {name:"范琼", type:"unit", faction:"song", cost:3, atk:2, def:3, text:"反复无常", power:null},
+  dingjin:   {name:"丁进", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"淮西贼", power:null},
+  kanglu:    {name:"康履", type:"unit", faction:"song", cost:1, atk:0, def:1, text:"内侍", power:null},
+
+  /* ===== 金方新增 ===== */
+  wanyan_sheng:{name:"完颜吴乞买",type:"unit",faction:"jin",cost:4,atk:3,def:4,text:"金太宗", power:null},
+  wanyan_xiyin:{name:"完颜希尹",type:"unit",faction:"jin",cost:2,atk:1,def:3,text:"制文字：登场抽1", power:"draw1_etb"},
+  wanyan_aguda:{name:"完颜阿骨打",type:"unit",faction:"jin",cost:6,atk:6,def:6,text:"太祖：金将+1/+1", power:"lord_jin"},
+  wanyan_mouyan:{name:"完颜谋衍",type:"unit",faction:"jin",cost:2,atk:2,def:2,text:"娄室次子", power:null},
+  gaojingshan:{name:"高景山",type:"unit",faction:"jin",cost:2,atk:2,def:2,text:"渤海使", power:null},
+  liulin:    {name:"刘麟", type:"unit", faction:"jin", cost:2, atk:2, def:2, text:"刘豫子", power:null},
+  wanyan_huangu:{name:"完颜拔离速",type:"unit",faction:"jin",cost:3,atk:3,def:2,text:"敏捷", power:"haste"},
+
+  /* ===== 中立/叛军/高丽 ===== */
+  zhongxiang:{name:"钟相", type:"unit", faction:"qi", cost:3, atk:2, def:3, text:"楚王", power:null},
+  yangmo:    {name:"杨么", type:"unit", faction:"qi", cost:2, atk:2, def:2, text:"洞庭水寇", power:null},
+  shibin:    {name:"史斌", type:"unit", faction:"qi", cost:3, atk:3, def:2, text:"称帝", power:null},
+  jinfushi:  {name:"金富轼", type:"unit", faction:"neutral", cost:1, atk:0, def:2, text:"高丽使：对手维持阶段-1粮", power:"opp_tax"},
+  zhengzhichang:{name:"郑知常",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"高丽主战：敏捷", power:"haste"},
+  zhengyinian:{name:"郑亿年",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"归朝人", power:null},
+
+  /* ===== 徽钦二帝与北狩宗室（历史包袱牌） ===== */
+  zhaoji:    {name:"宋徽宗赵佶",type:"unit",faction:"song",cost:3,atk:0,def:3,text:"道君：在场时每回合-1粮（北狩之辱）", power:"tax_drain"},
+  zhaohuan:  {name:"宋钦宗赵桓",type:"unit",faction:"song",cost:2,atk:0,def:2,text:"懦弱：不能攻击", power:"cant_attack"},
+  weixianfei:{name:"韦贤妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"显仁太后：横置产1粮", power:"mana_dork"},
+  xingbingyi:{name:"邢秉懿",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"嘉国夫人：宋将+0/+1", power:"lord_tough_minor"},
+  jiangzuifei:{name:"姜醉媚",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"返照：横置将对手1将弹回手牌", power:"bounce_on_tap"},
+  tianchunluo:{name:"田春罗",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"命令：登场令对手弃1牌", power:"opp_discard_etb"},
+  zhenghuanghou:{name:"郑皇后",type:"unit",faction:"neutral",cost:1,atk:0,def:2,text:"被掳北狩", power:null},
+  zhuhuanghou:{name:"朱皇后",type:"unit",faction:"neutral",cost:1,atk:0,def:2,text:"投水殉节：阵亡时对手-1威望", power:"death_damage1"},
+  zhaofujin: {name:"茂德帝姬",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"福金帝姬", power:null},
+
+  /* ===== 宋后宫 ===== */
+  zhangguifei:{name:"张贵妃",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"后宫", power:null},
+  liuwanyi:  {name:"刘婉仪",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"内侍省", power:null},
+
+  /* ===== 金方文物/装备（神器类） ===== */
+  tiefutu:   {name:"铁浮屠",type:"sorcery",faction:"jin",cost:2,text:"装备：一个金将+2/+2", power:"equip_2_2"},
+  guizima:   {name:"拐子马",type:"sorcery",faction:"jin",cost:1,text:"装备：一个金将获得敏捷", power:"equip_haste"},
+  langyabang:{name:"狼牙棒",type:"sorcery",faction:"jin",cost:1,text:"装备：一个金将+1/+1，击杀将后抽1", power:"equip_1_1_draw"},
+  jin_yuxi:  {name:"金国玉玺",type:"sorcery",faction:"jin",cost:2,text:"结界：每回合+1粮", power:"bonus_mana1_etb"},
+  menganmouke:{name:"猛安谋克",type:"sorcery",faction:"jin",cost:1,text:"结界：金将+0/+1", power:"lord_tough_jin"},
+
+  /* ===== 装备牌 ===== */
+  fangtian:  {name:"方天画戟",type:"sorcery",faction:"neutral",cost:2,text:"装备：一将+2/+2", power:"equip_2_2"},
+  songwen:   {name:"松纹剑",type:"sorcery",faction:"neutral",cost:1,text:"装备：一将+1/+1，穿喉", power:"equip_1_1_deathtouch"},
+  tangni:    {name:"唐猊铠",type:"sorcery",faction:"neutral",cost:2,text:"装备：一将+0/+3，铁壁", power:"equip_0_3_ward"},
+  liema:     {name:"大宛烈马",type:"sorcery",faction:"xixia",cost:1,text:"装备：一将+1/+0，敏捷", power:"equip_1_0_haste"},
+  shenbigong:{name:"神臂弓",type:"sorcery",faction:"song",cost:1,text:"装备：一将+1/+0，穿喉", power:"equip_1_0_deathtouch"},
+
+  /* ===== 名品牌（历史法术） ===== */
+  pofu:      {name:"破釜沉舟",type:"sorcery",faction:"song",cost:2,text:"本回合我方将+2/+0", power:"buff_board_2_0"},
+  caomu:     {name:"草木皆兵",type:"sorcery",faction:"song",cost:1,text:"抽3弃2", power:"draw3_discard2"},
+  zimian:    {name:"十面埋伏",type:"sorcery",faction:"song",cost:3,text:"消灭一个已横置的敌将", power:"kill_tapped"},
+  beishui:   {name:"背水一战",type:"sorcery",faction:"song",cost:2,text:"牺牲所有地，每地+1/+1给我方将", power:"sac_lands_buff"},
+  jiaozhao:  {name:"矫诏",type:"sorcery",faction:"neutral",cost:2,text:"复制我方上一张计策", power:"copy_spell"},
+
+  /* ===== 三十六计（瞬间，可在对手回合用） ===== */
+  manhai:    {name:"瞒天过海",type:"sorcery",faction:"neutral",cost:1,text:"抽1，本回合我将不可被指定", power:"draw1_ward"},
+  weiwei:    {name:"围魏救赵",type:"sorcery",faction:"song",cost:1,text:"对手-2威望，我将+1/+1", power:"ping2_buff"},
+  jiedao:    {name:"借刀杀人",type:"sorcery",faction:"jin",cost:2,text:"两个对敌将互撞", power:"mutual_combat"},
+  yiyi:      {name:"以逸待劳",type:"sorcery",faction:"song",cost:1,text:"重置我所有将和地", power:"untap_all"},
+  chenhuo:   {name:"趁火打劫",type:"sorcery",faction:"jin",cost:1,text:"我弃牌堆每有1牌，抽1", power:"draw_per_grave"},
+  shengdong: {name:"声东击西",type:"sorcery",faction:"song",cost:1,text:"本回合可直接攻玩家", power:"unblockable_turn"},
+  wuzhong:   {name:"无中生有",type:"sorcery",faction:"neutral",cost:1,text:"造一个1/1亲兵", power:"token_1_1"},
+  andu:      {name:"暗度陈仓",type:"sorcery",faction:"song",cost:1,text:"本回合将召唤失调免疫", power:"haste_turn"},
+  gean:      {name:"隔岸观火",type:"sorcery",faction:"neutral",cost:2,text:"本回合不受战斗伤害", power:"prevent_combat"},
+  daitaotao: {name:"李代桃僵",type:"sorcery",faction:"song",cost:1,text:"牺牲我1将，抽2回3", power:"sac_draw2_heal3"},
+  shunshou:  {name:"顺手牵羊",type:"sorcery",faction:"jin",cost:1,text:"拿对手弃牌堆1牌", power:"steal_grave"},
+  jingong:   {name:"擒贼擒王",type:"sorcery",faction:"jin",cost:3,text:"对手-5威望", power:"damage_player5"},
+  fuxin:     {name:"釜底抽薪",type:"sorcery",faction:"jin",cost:2,text:"毁对手1地", power:"destroy_land"},
+  jinchan:   {name:"金蝉脱壳",type:"sorcery",faction:"neutral",cost:2,text:"本回合免疫一切", power:"immune_turn"},
+  guanzimen: {name:"关门捉贼",type:"sorcery",faction:"song",cost:2,text:"消灭攻≤1的敌将", power:"kill_tiny"},
+  meiren:    {name:"美人计",type:"sorcery",faction:"pink",cost:1,text:"敌1将下回合不能攻击", power:"cant_attack_next"},
+  huanxiyuan:{name:"浣洗院",type:"sorcery",faction:"pink",cost:2,text:"目标敌将弹回手牌（北狩）", power:"bounce_one_enemy"},
+  kongcheng: {name:"空城计",type:"sorcery",faction:"song",cost:2,text:"本回合敌不能攻击", power:"enemy_no_attack"},
+  fanjian:   {name:"反间计",type:"sorcery",faction:"neutral",cost:2,text:"敌两将互撞", power:"mutual_combat"},
+  kourou:    {name:"苦肉计",type:"sorcery",faction:"song",cost:0,text:"我-3威望，抽3", power:"lose3_draw3"},
+  zouwei:    {name:"走为上",type:"sorcery",faction:"neutral",cost:1,text:"回5威望", power:"heal5"},
+
+  /* ===== 衍生物定义（不可抽到，只由技能生成） ===== */
+  token_cav: {name:"骑兵",type:"unit",faction:"neutral",cost:0,atk:2,def:2,text:"敏捷", power:"haste", isToken:true},
+  token_ax:  {name:"刀斧手",type:"unit",faction:"neutral",cost:0,atk:2,def:3,text:"重步", power:null, isToken:true},
+  token_archer:{name:"弓箭手",type:"unit",faction:"neutral",cost:0,atk:1,def:2,text:"穿喉", power:"deathtouch", isToken:true},
+  token_guard:{name:"亲兵",type:"unit",faction:"neutral",cost:0,atk:0,def:3,text:"铁壁", power:"ward", isToken:true},
+
+  /* ===== 州府/地 ===== */
+  kaiifeng:  {name:"开封府", type:"land", faction:"song", text:"大宋都城：产1粮"},
+  linan:     {name:"临安府", type:"land", faction:"song", text:"行在：产1粮"},
+  jiankang:  {name:"建康府", type:"land", faction:"song", text:"东南要会：产1粮"},
+  xiangyang: {name:"襄阳府", type:"land", faction:"song", text:"江汉锁钥：产1粮"},
+  chengdu:   {name:"成都府", type:"land", faction:"song", text:"天府：产1粮"},
+  taiyuan:   {name:"太原府", type:"land", faction:"jin", text:"河东根本：产1粮"},
+  hejian:    {name:"河间府", type:"land", faction:"jin", text:"河北重镇：产1粮"},
+  yanjing:   {name:"燕京", type:"land", faction:"jin", text:"析津：产1粮"},
+  caochang:  {name:"草场", type:"land", faction:"xixia", text:"贺兰草场：产1粮，召唤夏将时不横置"},
+  muchang:   {name:"牧场", type:"land", faction:"xixia", text:"河西牧场：产1粮，横置时夏将+1/+0"},
+  yanchi:    {name:"盐州", type:"land", faction:"xixia", text:"盐湖：产2粮，回合开始-1血"},
+  lianzhou:  {name:"善阐城", type:"land", faction:"dali", text:"大理都城：产1粮"},
+  tengyue:   {name:"腾越府", type:"land", faction:"dali", text:"西南边隘：产1粮"},
+  /* 双色地 */
+  huadong:   {name:"华东口岸", type:"land", faction:"neutral", text:"双色：可产宋粮或中立粮", dual:['song','neutral']},
+  hebei_qian:{name:"河北三镇", type:"land", faction:"neutral", text:"双色：可产宋粮或金粮", dual:['song','jin']},
+  hetao:     {name:"河套", type:"land", faction:"neutral", text:"双色：可产金粮或夏粮", dual:['jin','xixia']},
+  yunnan:    {name:"云南边市", type:"land", faction:"neutral", text:"双色：可产夏粮或理粮", dual:['xixia','dali']},
+  lingnan:   {name:"岭南商路", type:"land", faction:"neutral", text:"双色：可产宋粮或理粮", dual:['song','dali']},
+  goryeo:    {name:"高丽口岸", type:"land", faction:"neutral", text:"双色：可产金粮或中立粮", dual:['jin','neutral']},
+  /* 异国无色地（找地地） */
+  luoma:     {name:"罗马城", type:"land", faction:"neutral", text:"无色：登场时找一张地牌入战场", fetch:true},
+  junshitanding:{name:"君士坦丁堡", type:"land", faction:"neutral", text:"无色：产1粮，回合开始-1血", colorless:true, lifeLoss:1},
+  dashi:     {name:"大食港", type:"land", faction:"neutral", text:"无色：产1粮，抽1牌", colorless:true, draw:1},
+  tianzhu:   {name:"天竺", type:"land", faction:"neutral", text:"无色：产1粮，回1血", colorless:true, heal:1},
+};
+
+/* 连携关系：同场时触发 */
+const BONDS = [
+  {a:"yuefei", b:"zhangxian", buff:{atk:1,def:1}, desc:"岳家军"},
+  {a:"yuefei", b:"niugao", buff:{atk:1,def:0}, desc:"岳家军旧部"},
+  {a:"han_shizhong", b:"lianghongyu", buff:{atk:1,def:0}, desc:"韩梁伉俪"},
+  {a:"wanyan_loushi", b:"wanyan_huonv", buff:{atk:2,def:0}, desc:"娄室父子"},
+  {a:"wujie", b:"wulin", buff:{atk:1,def:0}, desc:"吴氏兄弟"},
+  {a:"liyanxian", b:"quduan", buff:{atk:0,def:1}, desc:"西军旧部"},
+  {a:"hongya", b:"qinhui", buff:{atk:0,def:1}, desc:"和议党"},
+];
+
+/* 从阵营卡池随机抽60张，其中22-24张地 */
+function buildDeck(faction){
+  // 收集该阵营可用的牌
+  const pool=Object.entries(CARD_DB).filter(([id,c])=>{
+    if(c.isToken) return false;
+    if(c.faction==='neutral'||c.faction==='pink') return true; // 中立和后宫所有阵营可用
+    return c.faction===faction;
+  }).map(([id])=>id);
+  const lands=pool.filter(id=>CARD_DB[id].type==='land');
+  const nonLands=pool.filter(id=>CARD_DB[id].type!=='land');
+  const landCount=22+Math.floor(Math.random()*3); // 22-24
+  const deck=[];
+  // 地牌随机
+  for(let i=0;i<landCount;i++) deck.push(lands[Math.floor(Math.random()*lands.length)]);
+  // 非地牌（每牌最多4张）
+  while(deck.length<60){
+    const id=nonLands[Math.floor(Math.random()*nonLands.length)];
+    if(deck.filter(x=>x===id).length>=4) continue;
+    deck.push(id);
+  }
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  return deck;
+}
+
+/* ---------- 状态 ---------- */
+let G=null;
+function newPlayer(faction,name){
+  return {faction,name,deck:buildDeck(faction),hand:[],board:[],lands:[],grave:[],
+    life:20,mana:0,manaMax:0,landsPlayedThisTurn:0};
+}
+function drawTo(p,n){
+  for(let i=0;i<n;i++){
+    if(p.deck.length===0){p.life=0;continue;}
+    if(p.hand.length>=7){p.grave.push(p.deck.pop());continue;}
+    p.hand.push({id:p.deck.pop()});
+  }
+}
+function logMsg(s){
+  G.log.push(s);
+  const box=document.getElementById('log-box');
+  box.innerHTML=G.log.slice(-40).map(l=>`<p>› ${l}</p>`).join('');
+  box.scrollTop=box.scrollHeight;
+}
+/* 战报面板折叠+拖动 */
+(function(){
+  const panel=document.getElementById('log-panel');
+  const bar=document.getElementById('log-titlebar');
+  const box=document.getElementById('log-box');
+  const toggle=document.getElementById('log-toggle');
+  let collapsed=false;
+  toggle.onclick=()=>{
+    collapsed=!collapsed;
+    box.style.display=collapsed?'none':'block';
+    toggle.textContent=collapsed?'▸':'▾';
+  };
+  let dragging=false,offX=0,offY=0;
+  bar.onmousedown=(e)=>{
+    if(e.target===toggle)return;
+    dragging=true;
+    const r=panel.getBoundingClientRect();
+    offX=e.clientX-r.left;offY=e.clientY-r.top;
+    panel.style.right='auto';
+    e.preventDefault();
+  };
+  document.onmousemove=(e)=>{
+    if(!dragging)return;
+    panel.style.left=Math.max(0,e.clientX-offX)+'px';
+    panel.style.top=Math.max(0,e.clientY-offY)+'px';
+    panel.style.bottom='auto';
+  };
+  document.onmouseup=()=>{dragging=false;};
+})();
+
+let pendingGameConfig=null;
+function initGame(mode,myFaction,enemyFaction,opts={}){
+  pendingGameConfig={mode,myFaction,enemyFaction,opts};
+  showScreen('dice-screen');
+  document.getElementById('dice').textContent='?';
+  document.getElementById('dice-result').textContent='';
+}
+function rollDice(pick){
+  const roll=1+Math.floor(Math.random()*20);
+  const diceEl=document.getElementById('dice');
+  diceEl.textContent='…';
+  // 滚动动画
+  let n=0;
+  const anim=setInterval(()=>{
+    diceEl.textContent=1+Math.floor(Math.random()*20);
+    if(++n>8){
+      clearInterval(anim);
+      diceEl.textContent=roll;
+      const isHigh=roll>=11;
+      const won=(pick==='high'&&isHigh)||(pick==='low'&&!isHigh);
+      document.getElementById('dice-result').textContent=won?`掷出 ${roll}，你赢了，你先手！`:`掷出 ${roll}，你输了，对手先手。`;
+      setTimeout(()=>beginGame(won),1200);
+    }
+  },80);
+}
+function beginGame(myFirst){
+  const {mode,myFaction,enemyFaction,opts}=pendingGameConfig;
+  G={mode,turn:1,active:0,phase:'untap',
+    my:newPlayer(myFaction,FACTIONS[myFaction].name+(myFaction==='song'?'主公':'朗主')),
+    enemy:newPlayer(enemyFaction,FACTIONS[enemyFaction].name+(enemyFaction==='jin'?'朗主':'主公')),
+    myFaction,online:opts.online||null,selectedCard:null,needChooseTarget:null,log:[],
+    mulliganCount:0,mulliganPhase:true,myFirst:myFirst};
+  drawTo(G.my,7);drawTo(G.enemy,7);
+  document.getElementById('my-faction-tag').textContent=FACTIONS[myFaction].tag;
+  document.getElementById('my-faction-tag').className='faction-tag f-tag-'+myFaction;
+  document.getElementById('enemy-faction-tag').textContent=FACTIONS[enemyFaction].tag;
+  document.getElementById('enemy-faction-tag').className='faction-tag f-tag-'+enemyFaction;
+  logMsg(`掷骰结果：${myFirst?'你':'对手'}先手。`);
+  showScreen('game-screen');
+  render();
+  showMulliganUI();
+}
+
+function showMulliganUI(){
+  G.active=-1;
+  document.getElementById('turn-label').textContent=`调度阶段 · 已调度${G.mulliganCount}次`;
+  document.getElementById('end-turn-btn').disabled=true;
+  document.getElementById('attack-btn').disabled=true;
+  let bar=document.getElementById('mulligan-bar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='mulligan-bar';
+    bar.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);padding:12px 20px;border-radius:6px;display:flex;gap:12px;align-items:center;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML=`<span style="color:var(--paper);font-size:13px">起手${G.my.hand.length}张</span>
+    <button class="action-btn" onclick="doMulligan()">调度（洗回重抽，少1张）</button>
+    <button class="action-btn danger" onclick="keepHand()">就这把，开战</button>`;
+}
+function doMulligan(){
+  if(G.mulliganCount>=7){alert('不能再调度了');return;}
+  G.my.hand.forEach(c=>G.my.deck.push(c.id));
+  G.my.hand=[];
+  for(let i=G.my.deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[G.my.deck[i],G.my.deck[j]]=[G.my.deck[j],G.my.deck[i]];}
+  G.mulliganCount++;
+  drawTo(G.my,7-G.mulliganCount);
+  logMsg(`调度第${G.mulliganCount}次，重抽${7-G.mulliganCount}张。`);
+  render();showMulliganUI();
+}
+function keepHand(){
+  document.getElementById('mulligan-bar')?.remove();
+  G.mulliganPhase=false;
+  logMsg('接受手牌。');
+  const myFirst=G.myFirst!==false;
+  G.active=myFirst?0:1;
+  if(myFirst){
+    runPhase('untap');
+  } else {
+    runOpponentTurn();
+  }
+}
+
+function startTurn(idx){
+  G.active=idx;
+  if(idx===0){
+    // 玩家回合：走阶段流
+    runPhase('untap');
+  } else {
+    // AI 回合
+    setTimeout(aiTakeTurn,600);
+  }
+}
+
+function endTurn(){
+  // 结束按钮=直接跳到结束阶段
+  runPhase('end_turn');
+}
+function checkWin(){
+  if(G.my.life<=0||(G.my.deck.length===0&&G.my.hand.length===0)){endGame(false);return true;}
+  if(G.enemy.life<=0||(G.enemy.deck.length===0&&G.enemy.hand.length===0)){endGame(true);return true;}
+  return false;
+}
+function endGame(i){
+  document.getElementById('end-title').textContent=i?'大捷':'败北';
+  document.getElementById('end-text').textContent=i?'山河终有还本日':'二圣未还，朕不敢言胜';
+  document.getElementById('end-overlay').classList.add('active');
+  // 保存 replay
+  try{
+    const replay={date:new Date().toLocaleString(),result:i?'胜':'负',myFaction:G.myFaction,enemyFaction:G.enemy.faction,turn:G.turn,log:G.log};
+    const replays=JSON.parse(localStorage.getItem('shaosong_replays')||'[]');
+    replays.unshift(replay);
+    localStorage.setItem('shaosong_replays',JSON.stringify(replays.slice(0,20)));
+  }catch(e){}
+}
+function modeIsAI(){return G&&G.mode==='ai';}
+
+/* ---------- 连携与属性 ---------- */
+function recomputeBoard(){
+  [G.my,G.enemy].forEach(p=>{
+    p.board.forEach(c=>{c.buffAtk=0;c.buffDef=0;});
+  });
+  // 领袖光环
+  [G.my,G.enemy].forEach(p=>{
+    if(p.board.some(c=>c.id==='zhaojiu')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='song'){c.buffAtk++;c.buffDef++;}});
+    if(p.board.some(c=>c.id==='zongze')||p.board.some(c=>c.id==='lvhaowen')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffDef++;});
+    if(p.board.some(c=>c.id==='xingbingyi')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffDef++;});
+    if(p.board.some(c=>c.id==='liyuanhao')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='xixia'){c.buffAtk++;c.buffDef++;}});
+    if(p.board.some(c=>c.id==='wanyan_aguda')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin'){c.buffAtk++;c.buffDef++;}});
+    if(p.board.some(c=>c.id==='ligang')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffAtk++;});
+    // 李世辅 vs 金将
+    p.board.forEach(c=>{if(c.id==='lishifu'&&p.board.some(x=>CARD_DB[x.id].faction==='jin'))c.buffAtk+=2;});
+    // 相生：同场盟友阵营+0/+1
+    p.board.forEach(c=>{
+      const f=CARD_DB[c.id].faction;
+      const allies=FACTION_ALLIES[f]||[];
+      if(allies.some(a=>p.board.some(x=>CARD_DB[x.id].faction===a)))c.buffDef++;
+    });
+  });
+  // 连携
+  [G.my,G.enemy].forEach(p=>{
+    const ids=p.board.map(c=>c.id);
+    for(const bond of BONDS){
+      if(ids.includes(bond.a)&&ids.includes(bond.b)){
+        p.board.forEach(c=>{if(c.id===bond.a||c.id===bond.b){c.buffAtk+=bond.buff.atk;c.buffDef+=bond.buff.def;}});
+        c._bond=bond.desc;
+      }
+    }
+  });
+}
+function getAtk(c){return (CARD_DB[c.id].atk||0)+(c.buffAtk||0)+(c.weaken||0);}
+function getDef(c){return (CARD_DB[c.id].def||0)+(c.buffDef||0)+(c.weaken||0);}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  renderP(G.enemy,'enemy');renderP(G.my,'my');
+  const pn=PHASE_NAMES[G.phase]||G.phase;
+  document.getElementById('turn-label').textContent=`第${G.turn}回合 · ${G.active===0?'你的':'对手'} · ${pn}`;
+  const canAct=(G.active===0&&(G.phase==='precombat_main'||G.phase==='postcombat_main'));
+  document.getElementById('end-turn-btn').disabled=!canAct;
+  document.getElementById('attack-btn').disabled=!(G.active===0&&(G.phase==='precombat_main'||G.phase==='begin_combat'));
+  document.getElementById('attack-btn').textContent=G.phase==='declare_attack'?'开打':'开战';
+  document.getElementById('next-phase-btn').disabled=G.active!==0;
+  document.getElementById('cancel-target-btn').style.display=G.needChooseTarget?'inline-block':'none';
+  document.querySelectorAll('#my-board .card').forEach((el,i)=>{
+    if(G.phase==='declare_attack'&&pendingAttackers.includes(i))el.classList.add('selected');
+  });
+}
+function renderP(p,prefix){
+  document.getElementById(prefix+'-life').textContent=p.life;
+  document.getElementById(prefix+'-mana').textContent=p.mana;
+  document.getElementById(prefix+'-manamax').textContent=p.manaMax;
+  document.getElementById(prefix+'-deck').textContent=p.deck.length;
+  if(prefix==='my')document.getElementById('my-grave').textContent=p.grave.length;
+  document.getElementById(prefix+'-lands').innerHTML=p.lands.map((c,i)=>cardHTML(c,prefix==='my','land',i)).join('')||`<span style="color:var(--hui);font-size:12px">（未立）</span>`;
+  document.getElementById(prefix+'-board').innerHTML=p.board.map((c,i)=>cardHTML(c,prefix==='my','board',i)).join('')||`<span style="color:var(--hui);font-size:12px">（无将）</span>`;
+  if(prefix==='my')document.getElementById('my-hand').innerHTML=p.hand.map((c,i)=>cardHTML(c,true,'hand',i)).join('');
+  bindClicks(p,prefix);
+}
+function cardHTML(c,mine,zone,idx){
+  const cid=c.id;const db=CARD_DB[cid];
+  const cost=db.cost!==undefined?`<div class="card-cost">${db.cost}</div>`:'';
+  const stats=db.type==='unit'?`<div class="card-stats">${getAtk(c)}/${getDef(c)}</div>`:'';
+  const art=db.type==='unit'?db.name[0]:db.type==='land'?'府':'计';
+  const cls=db.type==='land'?'land':db.faction;
+  const tapped=c.tapped?'tapped':'';
+  const sick=(zone==='board'&&mine&&c.sick&&db.power!=='haste')?'disabled':'';
+  const sel=(G&&G.selectedCard===idx&&zone==='hand')?'selected':'';
+  const tgt=(G&&G.needChooseTarget&&zone==='board'&&!mine)?'targetable':'';
+  const bond=c._bond?`<div class="card-bond">${c._bond}</div>`:'';
+  return `<div class="card ${tapped} ${sick} ${sel} ${tgt}" data-zone="${zone}" data-idx="${idx}" data-id="${c.id}">${cost}${bond}
+    <div class="card-name">${db.name}</div>
+    <div class="card-art ${cls}">${art}</div>
+    <div class="card-type">${db.type==='unit'?'将领':db.type==='land'?'州府':db.type==='instant'?'计策':'名品'}</div>
+    ${stats}</div>`;
+}
+function bindClicks(p,prefix){
+  const isMe=prefix==='my';const myTurn=G.active===0;
+  if(isMe){
+    document.querySelectorAll('#my-hand .card').forEach(el=>{el.onclick=()=>{
+      if(!myTurn)return;
+      const hc=G.my.hand[+el.dataset.idx];if(!hc)return;
+      const db=CARD_DB[hc.id];
+      // 名品牌（sorcery）只能主阶段用；计策（instant）任意阶段可用
+      if(db.type==='sorcery'&&G.phase!=='precombat_main'&&G.phase!=='postcombat_main')return;
+      onHandCardClick(+el.dataset.idx);
+    };});
+    document.querySelectorAll('#my-lands .card').forEach(el=>{el.onclick=()=>{if(myTurn&&(G.phase==='precombat_main'||G.phase==='postcombat_main'))toggleLand(+el.dataset.idx);};});
+    document.querySelectorAll('#my-board .card').forEach(el=>{el.onclick=()=>{
+      if(G.phase==='declare_attack'){toggleAttacker(+el.dataset.idx);return;}
+      if(myTurn)onBoardUnitClick(+el.dataset.idx);
+    };});
+    document.querySelectorAll('#enemy-board .card').forEach(el=>{
+      if(G.needChooseTarget)el.onclick=()=>resolveTarget(+el.dataset.idx);
+      else if(G.phase==='declare_attack')el.onclick=()=>setAttackTarget(+el.dataset.idx);
+    });
+    // 点对手血条=打玩家
+    document.querySelector('.player-bar.enemy').style.cursor='pointer';
+    document.querySelector('.player-bar.enemy').onclick=()=>{if(G.phase==='declare_attack')setAttackTarget(null);};
+  }
+  // 悬停卡牌详情
+  document.querySelectorAll('.card').forEach(el=>{
+    const id=el.dataset.id;
+    if(!id||!CARD_DB[id])return;
+    el.onmouseenter=()=>showTooltip(el);
+    el.onmouseleave=hideTooltip;
+  });
+}
+
+function showTooltip(el){
+  const id=el.dataset.id;if(!id||!CARD_DB[id])return;
+  const db=CARD_DB[id];
+  const fac=FACTIONS[db.faction]||{name:'中立',color:'#889'};
+  let html=`<div style="font-weight:700;font-size:15px;margin-bottom:4px;color:${fac.color}">${db.name}</div>`;
+  html+=`<div style="color:var(--ink-soft);font-size:11px;margin-bottom:6px">${fac.name} · ${typeName(db.type)} · 费用 ${db.cost||0}</div>`;
+  if(db.type==='unit')html+=`<div style="margin-bottom:6px">攻 ${db.atk||0} / 防 ${db.def||0}</div>`;
+  if(db.text)html+=`<div style="border-top:1px solid var(--tie);padding-top:6px">${db.text}</div>`;
+  // 阵营特性
+  const facBonus=FACTION_POWERS[db.faction];
+  if(facBonus)html+=`<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--tie);font-size:11px;color:var(--ink-soft)"><b style="color:${fac.color}">${fac.name}特性：</b>${facBonus}</div>`;
+  const tip=document.getElementById('card-tooltip');
+  tip.innerHTML=html;tip.style.display='block';
+  moveTooltip(el);
+}
+function moveTooltip(el){
+  const tip=document.getElementById('card-tooltip');
+  const r=el.getBoundingClientRect();
+  let x=r.left+r.width+10;if(x+280>window.innerWidth)x=r.left-270;
+  let y=r.top;if(y+tip.offsetHeight>window.innerHeight)y=window.innerHeight-tip.offsetHeight-10;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+function hideTooltip(){document.getElementById('card-tooltip').style.display='none';}
+function typeName(t){return {unit:'将领',land:'州府',sorcery:'名品',instant:'计策'}[t]||t;}
+
+/* ---------- 出牌 ---------- */
+function onHandCardClick(idx){
+  if(G.active!==0)return;
+  const hc=G.my.hand[idx];const db=CARD_DB[hc.id];
+  // 名品（法术）只能主阶段用；计策（瞬间）任意阶段
+  if(db.type==='brand'&&G.phase!=='precombat_main'&&G.phase!=='postcombat_main'){logMsg('名品只能在主阶段使用。');return;}
+  if(db.type==='instant'&&!['precombat_main','postcombat_main','declare_attack','declare_block','deal_damage','end_turn'].includes(G.phase)){logMsg('此时机不可用。');return;}
+  if(db.type==='land'){
+    if(G.my.landsPlayedThisTurn>=1){logMsg('本回合已下过州府。');return;}
+    G.my.lands.push({id:hc.id,tapped:false});
+    G.my.manaMax++;
+    G.my.hand.splice(idx,1);
+    G.my.landsPlayedThisTurn++;
+    logMsg(`${G.my.name} 设立 <b>${db.name}</b>。点州府可横置产粮。`);
+    recomputeBoard();render();return;
+  }
+  if(db.cost>G.my.mana){logMsg(`粮草不足（需${db.cost}，现有${G.my.mana}）。请先点州府横置产粮。`);return;}
+  if((db.type==='sorcery'||db.type==='instant')&&needsTarget(db.power)){
+    G.my.mana-=db.cost;
+    G.needChooseTarget={power:db.power,handIdx:idx};
+    logMsg(`选择目标以施展 <b>${db.name}</b>…（点取消按钮可放弃）`);
+    render();return;
+  }
+  playCard(idx);
+}
+function needsTarget(p){return ['kill_small','deal3_to_unit','deal2_to_unit','weaken_1_1','bounce_one_enemy'].includes(p);}
+function playCard(handIdx,targetIdx){
+  const cid=G.my.hand[handIdx].id;const db=CARD_DB[cid];
+  G.my.mana-=db.cost;
+  G.my.hand.splice(handIdx,1);
+  logMsg(`${G.my.name} 打出 <b>${db.name}</b>。`);
+  if(db.type==='unit'){
+    G.my.board.push({id:cid,tapped:false,sick:true});
+    if(db.power==='draw1_etb'){drawTo(G.my,1);logMsg(`「${db.name}」登场，抽1。`);}
+    if(db.power==='heal_both1_etb'){G.my.life++;G.enemy.life++;logMsg(`「${db.name}」仁厚，双方各回1血。`);}
+    if(db.power==='token_etb_ax'){G.my.board.push({id:'token_ax',tapped:false,sick:true});logMsg(`「${db.name}」召来刀斧手！`);}
+    if(db.power==='token_etb_cav'||db.power==='haste_token_cav'){G.my.board.push({id:'token_cav',tapped:false,sick:true});logMsg(`「${db.name}」召来骑兵！`);}
+    if(db.power==='token_etb_archer'){G.my.board.push({id:'token_archer',tapped:false,sick:true});logMsg(`「${db.name}」召来弓箭手！`);}
+    if(db.power==='opp_discard_etb'){const c=G.enemy.hand.pop();if(c){G.enemy.grave.push(c);logMsg(`「${db.name}」命令，对手弃1牌。`);}}
+  }else if(db.type==='sorcery'||db.type==='instant'){
+    G.my.grave.push(cid);
+    resolveSpell(db.power,targetIdx);
+  }
+  recomputeBoard();if(checkWin())return;render();
+}
+function cancelTarget(){
+  if(!G.needChooseTarget)return;
+  // 退回手牌和费用
+  const need=G.needChooseTarget;
+  G.my.mana+=CARD_DB[G.my.hand[need.handIdx].id].cost;
+  G.needChooseTarget=null;
+  logMsg('已取消施法。');render();
+}
+function resolveTarget(oppIdx){
+  const need=G.needChooseTarget;if(!need)return;
+  const t=G.enemy.board[oppIdx];if(!t){G.needChooseTarget=null;render();return;}
+  // 铁壁：不能被指定
+  if(t.ward||CARD_DB[t.id].power==='ward'){logMsg(`${CARD_DB[t.id].name} 有铁壁保护，不可指定。`);return;}
+  if(need.power==='kill_small'&&getAtk(t)>2){logMsg('该将攻>2，不可指定。');return;}
+  G.needChooseTarget=null;
+  playCard(need.handIdx,oppIdx);
+}
+function resolveSpell(power,ti){
+  const me=G.my,opp=G.enemy;
+  switch(power){
+    case 'draw2':drawTo(me,2);logMsg('抽2牌。');break;
+    case 'draw2_buff_1_0':drawTo(me,2);me.board.forEach(c=>c.buffAtk+=1);logMsg('白河郊游图：抽2，本回合将+1攻。');break;
+    case 'heal5':me.life+=5;logMsg('威望+5。');break;
+    case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
+    case 'buff_board_0_2':me.board.forEach(c=>c.buffDef+=2);logMsg('坚壁清野，+0/+2。');break;
+    case 'bonus_mana2':me.mana+=2;logMsg('天命+2粮。');break;
+    case 'mutual_draw1_heal2':drawTo(me,1);drawTo(opp,1);me.life+=2;opp.life+=2;logMsg('和议。');break;
+    case 'kill_small':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];
+      opp.grave.push(t.id);opp.board.splice(ti,1);
+      logMsg(`莫须有诛杀 ${CARD_DB[t.id].name}！`);break;
+    }
+    case 'deal3_to_unit':case 'deal2_to_unit':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];const d=power==='deal3_to_unit'?3:2;
+      t.damageTaken=(t.damageTaken||0)+d;
+      logMsg(`对 ${CARD_DB[t.id].name} 造成${d}伤。`);cleanupDead();break;
+    }
+    case 'weaken_1_1':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];t.weaken=(t.weaken||0)-1;
+      logMsg(`巫蛊缠身，${CARD_DB[t.id].name} -1/-1。`);break;
+    }
+    case 'bounce_one_enemy':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];
+      opp.hand.push(t);opp.board.splice(ti,1);
+      logMsg(`浣洗院北狩，${CARD_DB[t.id].name}被遣返手牌。`);break;
+    }
+    case 'equip_2_2':{
+      const t=me.board.find(c=>CARD_DB[c.id].faction==='jin');
+      if(t){t.buffAtk+=2;t.buffDef+=2;logMsg(`铁浮屠披挂于 ${CARD_DB[t.id].name}，+2/+2。`);}
+      else logMsg('无金将可装备。');break;
+    }
+    case 'equip_haste':{
+      const t=me.board.find(c=>!CARD_DB[c.id].power==='haste');
+      if(t){t.givenHaste=true;logMsg(`拐子马交于 ${CARD_DB[t.id].name}，获得敏捷。`);}
+      else logMsg('无将可装备。');break;
+    }
+    case 'equip_1_1_draw':{
+      const t=me.board[0];
+      if(t){t.buffAtk+=1;t.buffDef+=1;t.onKillDraw=true;logMsg(`${CARD_DB[t.id].name} 持狼牙棒，+1/+1。`);}
+      break;
+    }
+    case 'bonus_mana1_etb':{
+      me.permanentManaBonus=(me.permanentManaBonus||0)+1;
+      me.mana+=1;
+      logMsg('金国玉玺：每回合+1粮。');break;
+    }
+    case 'lord_tough_jin':{
+      me.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffDef+=1;});
+      logMsg('猛安谋克：金将+0/+1。');break;
+    }
+    /* 装备 */
+    case 'equip_1_1_deathtouch':{
+      const t=me.board[0];if(t){t.buffAtk++;t.buffDef++;t.deathtouch=true;logMsg(`${CARD_DB[t.id].name} 佩剑，+1/+1 穿喉。`);}break;
+    }
+    case 'equip_0_3_ward':{
+      const t=me.board[0];if(t){t.buffDef+=3;t.ward=true;logMsg(`${CARD_DB[t.id].name} 披铠，+0/+3 铁壁。`);}break;
+    }
+    case 'equip_1_0_haste':{
+      const t=me.board[0];if(t){t.buffAtk++;t.givenHaste=true;logMsg(`${CARD_DB[t.id].name} 乘烈马，+1/+0 敏捷。`);}break;
+    }
+    case 'equip_1_0_deathtouch':{
+      const t=me.board[0];if(t){t.buffAtk++;t.deathtouch=true;logMsg(`${CARD_DB[t.id].name} 持神臂弓，+1/+0 穿喉。`);}break;
+    }
+    /* 名品 */
+    case 'buff_board_2_0':me.board.forEach(c=>c.buffAtk+=2);logMsg('破釜沉舟，+2/+0！');break;
+    case 'draw3_discard2':drawTo(me,3);for(let i=0;i<2&&me.hand.length>0;i++)me.grave.push(me.hand.pop());logMsg('草木皆兵，抽3弃2。');break;
+    case 'kill_tapped':{
+      const t=opp.board.find(c=>c.tapped);
+      if(t){opp.grave.push(t.id);opp.board.splice(opp.board.indexOf(t),1);logMsg(`十面埋伏诛 ${CARD_DB[t.id].name}！`);}
+      else logMsg('敌无可诛之将。');break;
+    }
+    case 'sac_lands_buff':{
+      const n=me.lands.length;me.lands=[];me.manaMax=0;
+      me.board.forEach(c=>{c.buffAtk+=n;c.buffDef+=n;});
+      logMsg(`背水一战！焚${n}地，我方将+${n}/+${n}。`);break;
+    }
+    case 'copy_spell':logMsg('矫诏：复制上一张计策（演示中）。');break;
+    /* 三十六计 */
+    case 'draw1_ward':drawTo(me,1);me.wardTurn=true;logMsg('瞒天过海，抽1，本回合我将铁壁。');break;
+    case 'ping2_buff':opp.life-=2;me.board.forEach(c=>{c.buffAtk++;c.buffDef++;});logMsg('围魏救赵！');break;
+    case 'mutual_combat':{
+      if(opp.board.length>=2){
+        const [a,b]=opp.board;
+        a.damageTaken=(a.damageTaken||0)+getAtk(b);
+        b.damageTaken=(b.damageTaken||0)+getAtk(a);
+        logMsg(`反间计使 ${CARD_DB[a.id].name} 与 ${CARD_DB[b.id].name} 互攻！`);
+        cleanupDead();
+      } else logMsg('敌将不足，计不得施。');break;
+    }
+    case 'untap_all':me.lands.forEach(l=>l.tapped=false);me.board.forEach(c=>c.tapped=false);me.mana=me.manaMax+(me.permanentManaBonus||0);logMsg('以逸待劳，全部重置。');break;
+    case 'draw_per_grave':{const n=me.grave.length;drawTo(me,n);logMsg(`趁火打劫，抽${n}。`);break;}
+    case 'unblockable_turn':me.unblockableTurn=true;logMsg('声东击西！');break;
+    case 'token_1_1':me.board.push({id:'token_guard',tapped:false,sick:true});logMsg('无中生有，召亲兵。');break;
+    case 'haste_turn':me.hasteTurn=true;logMsg('暗度陈仓！');break;
+    case 'prevent_combat':me.preventCombat=true;logMsg('隔岸观火。');break;
+    case 'sac_draw2_heal3':{
+      if(me.board.length){const v=me.board.shift();me.grave.push(v.id);drawTo(me,2);me.life+=3;logMsg(`李代桃僵，牺牲 ${CARD_DB[v.id].name}。`);}break;
+    }
+    case 'steal_grave':{
+      if(opp.grave.length){const cid=opp.grave.pop();me.hand.push({id:cid});logMsg(`顺手牵羊，取 ${CARD_DB[cid].name}。`);}break;
+    }
+    case 'damage_player5':opp.life-=5;logMsg('擒贼擒王，-5威望！');break;
+    case 'destroy_land':{
+      if(opp.lands.length){const l=opp.lands.pop();opp.manaMax=Math.max(0,opp.manaMax-1);logMsg(`釜底抽薪，毁 ${CARD_DB[l.id].name}。`);}break;
+    }
+    case 'immune_turn':me.immuneTurn=true;logMsg('金蝉脱壳。');break;
+    case 'kill_tiny':{
+      const t=opp.board.find(c=>getAtk(c)<=1);
+      if(t){opp.grave.push(t.id);opp.board.splice(opp.board.indexOf(t),1);logMsg(`关门捉贼诛 ${CARD_DB[t.id].name}。`);}break;
+    }
+    case 'cant_attack_next':{
+      if(opp.board[0])opp.board[0].cantAttackNext=true;logMsg('美人计。');break;
+    }
+    case 'enemy_no_attack':opp.noAttackTurn=true;logMsg('空城计。');break;
+    case 'lose3_draw3':me.life-=3;drawTo(me,3);logMsg('苦肉计，-3威望抽3。');break;
+    case 'heal5':me.life+=5;logMsg('走为上，回5。');break;
+    case 'steal_1drop':break;
+    case 'sac_draw3':{
+      if(me.board.length===0){logMsg('无将可牺牲。break');break;}
+      const v=me.board.shift();me.grave.push(v.id);drawTo(me,3);
+      logMsg(`牺牲 ${CARD_DB[v.id].name}，抽3。`);break;
+    }
+  }
+}
+function cleanupDead(){
+  [G.my,G.enemy].forEach((p,pi)=>{
+    const opp=pi===0?G.enemy:G.my;
+    const alive=[];
+    p.board.forEach(c=>{
+      if((c.damageTaken||0)>=getDef(c)){
+        p.grave.push(c.id);
+        logMsg(`${CARD_DB[c.id].name} 阵亡。`);
+        const pw=CARD_DB[c.id].power;
+        if(pw==='death_damage2'){opp.life-=2;logMsg(`${CARD_DB[c.id].name} 殉国，对手-2威望！`);}
+        if(pw==='death_damage1'){opp.life-=1;logMsg(`${CARD_DB[c.id].name} 殉节，对手-1威望！`);}
+        if(pw==='death_draw1'){drawTo(p,1);logMsg(`${CARD_DB[c.id].name} 死后留书，抽1。`);}
+      }
+      else alive.push(c);
+    });
+    p.board=alive;p.board.forEach(c=>c.damageTaken=0);
+  });
+  recomputeBoard();
+}
+
+/* 横置地=产粮，本回合锁定不可手动重置 */
+function toggleLand(idx){
+  if(G.active!==0||(G.phase!=='precombat_main'&&G.phase!=='postcombat_main'))return;
+  const l=G.my.lands[idx];if(!l)return;
+  const db=CARD_DB[l.id];
+  if(l.tapped){
+    l.tapped=false;G.my.mana=Math.max(0,G.my.mana-1);
+  } else {
+    l.tapped=true;G.my.mana++;
+    if(db.heal){G.my.life+=db.heal;logMsg(`「${db.name}」回${db.heal}血。`);}
+    if(db.draw){drawTo(G.my,db.draw);logMsg(`「${db.name}」抽${db.draw}牌。`);}
+  }
+  render();
+}
+function onBoardUnitClick(idx){
+  const c=G.my.board[idx];if(!c)return;
+  const db=CARD_DB[c.id];
+  // 李清照：横置抽牌
+  if(db.power==='tap_draw'&&!c.tapped){c.tapped=true;drawTo(G.my,1);logMsg(`「${db.name}」横置填词，抽1牌。`);render();return;}
+  // 刘豫/没藏：横置产粮
+  if(db.power==='mana_dork'&&!c.tapped){c.tapped=true;G.my.mana++;logMsg(`「${db.name}」横置，+1粮。`);render();return;}
+  // 姜醉媚：横置弹回对方1将
+  if(db.power==='bounce_on_tap'&&!c.tapped){c.tapped=true;const t=G.enemy.board.pop();if(t){G.enemy.hand.push(t);logMsg(`「${db.name}」返照，${CARD_DB[t.id].name}被遣返手牌。`);}render();return;}
+  if(c.tapped){c.tapped=false;}else{c.tapped=true;}
+  render();
+}
+
+/* ---------- 战斗 ---------- */
+let pendingAttackers=[];
+let attackTarget=null; // null=打玩家, 或敌将board索引
+
+function onAttackBtn(){
+  if(G.phase==='declare_attack'){
+    if(attackTarget===null) setAttackTarget(null);
+    else confirmAttack();
+  }
+  else declareAttackers();
+}
+/* MTG 阶段流 */
+const PHASES=['untap','upkeep','draw','precombat_main','begin_combat','declare_attack','declare_block','deal_damage','end_combat','postcombat_main','end_turn','cleanup'];
+const PHASE_NAMES={untap:'重置',upkeep:'维持',draw:'抽牌',precombat_main:'战前主阶段',begin_combat:'战斗开始',declare_attack:'宣告攻击',declare_block:'宣告阻挡',deal_damage:'结算伤害',end_combat:'战斗结束',postcombat_main:'战后主阶段',end_turn:'结束回合',cleanup:'清除'};
+
+/* AI 回合：自动走完阶段 */
+function runOpponentTurn(){
+  const ai=G.enemy;
+  ai.lands.forEach(l=>l.tapped=false);
+  ai.board.forEach(c=>{c.sick=false;c.tapped=false;c.weaken=0;});
+  ai.manaMax=ai.lands.length;
+  ai.mana=ai.manaMax+(ai.permanentManaBonus||0);
+  ai.landsPlayedThisTurn=0;
+  ai.lands.forEach(l=>{if(l.id==='yanchi')ai.life-=1;});
+  if(G.turn>1)drawTo(ai,1);
+  G.phase='untap';
+  recomputeBoard();
+  render();
+  setTimeout(aiTakeTurn,800);
+}
+
+function nextPhase(){
+  if(G.active!==0)return;
+  const idx=PHASES.indexOf(G.phase);
+  if(idx===PHASES.length-1){
+    // cleanup 走完，切 AI 回合（不立即加回合数，等 AI 走完再加）
+    if(checkWin())return;
+    G.active=1;
+    runOpponentTurn();
+    return;
+  }
+  const next=PHASES[idx+1];
+  runPhase(next);
+}
+
+function runPhase(ph){
+  G.phase=ph;
+  const p=G.my;
+  switch(ph){
+    case 'untap':
+      p.lands.forEach(l=>l.tapped=false);
+      p.board.forEach(c=>{c.tapped=false;c.sick=false;c.weaken=0;});
+      p.manaMax=p.lands.length;
+      p.mana=p.manaMax+(p.permanentManaBonus||0);
+      p.landsPlayedThisTurn=0;
+      logMsg('—— 重置阶段 ——');
+      break;
+    case 'upkeep':
+      p.lands.forEach(l=>{if(l.id==='yanchi')p.life-=1;});
+      p.board.forEach(c=>{if(c.id==='huangqianshan')p.mana=Math.max(0,p.mana-1);});
+      logMsg('—— 维持阶段 ——');
+      break;
+    case 'draw':
+      if(G.turn>1)drawTo(p,1);
+      logMsg('—— 抽牌阶段 ——');
+      break;
+    case 'precombat_main':
+      logMsg('—— 战前主阶段：出牌、下地 ——');
+      break;
+    case 'begin_combat':
+      logMsg('—— 战斗开始 ——');
+      break;
+    case 'declare_attack':
+      pendingAttackers=[];attackTarget=null;
+      logMsg('—— 宣告攻击：点选我方将，点敌将/血条指定目标 ——');
+      break;
+    case 'declare_block':
+      logMsg('—— 宣告阻挡 ——');
+      break;
+    case 'deal_damage':
+      // 实际伤害在 confirmAttack 里算
+      break;
+    case 'end_combat':
+      logMsg('—— 战斗结束 ——');
+      break;
+    case 'postcombat_main':
+      logMsg('—— 战后主阶段：还能出牌 ——');
+      break;
+    case 'end_turn':
+      while(p.hand.length>7)p.grave.push(p.hand.pop());
+      logMsg(`${p.name} 结束回合。`);
+      break;
+    case 'cleanup':
+      logMsg('—— 清除阶段，回合结束 ——');
+      break;
+  }
+  recomputeBoard();
+  render();
+}
+
+function declareAttackers(){
+  if(G.active!==0||(G.phase!=='precombat_main'&&G.phase!=='begin_combat'))return;
+  const canAttack=G.my.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste')&&CARD_DB[c.id].power!=='cant_attack');
+  if(canAttack.length===0){logMsg('无可攻之将。');return;}
+  G.phase='declare_attack';
+  pendingAttackers=[];attackTarget=null;
+  logMsg('—— 宣告攻击：点选我方将，点敌将/血条指定目标 ——');
+  render();
+}
+function toggleAttacker(idx){
+  const i=pendingAttackers.indexOf(idx);
+  if(i>=0)pendingAttackers.splice(i,1);
+  else pendingAttackers.push(idx);
+  render();
+}
+function setAttackTarget(ti){
+  if(pendingAttackers.length===0){logMsg('先点选我方将领。');return;}
+  attackTarget=ti;
+  logMsg(ti===null?`${pendingAttackers.length}将直扑中军！`:`集火 ${CARD_DB[G.enemy.board[ti].id].name}！`);
+  confirmAttack();
+}
+function confirmAttack(){
+  if(pendingAttackers.length===0){G.phase='main';render();return;}
+  pendingAttackers.forEach(i=>{G.my.board[i].tapped=true;});
+  logMsg(`—— ${pendingAttackers.length} 将出击！——`);
+  setTimeout(()=>{
+    if(attackTarget===null){
+      // 打玩家：AI 选阻挡
+      const avail=G.enemy.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste'));
+      const sorted=pendingAttackers.map(i=>G.my.board[i]).sort((a,b)=>getAtk(b)-getAtk(a));
+      for(const a of sorted){
+        const can=avail.find(b=>getDef(b)>=getAtk(a));
+        if(can){can.tapped=true;dealCombat(a,can);avail.splice(avail.indexOf(can),1);}
+        else dealCombat(a,null);
+      }
+    } else {
+      // 集火指定将
+      const t=G.enemy.board[attackTarget];
+      if(t){
+        pendingAttackers.forEach(i=>{
+          const a=G.my.board[i];
+          t.damageTaken=(t.damageTaken||0)+getAtk(a);
+          a.damageTaken=(a.damageTaken||0)+getDef(t);
+        });
+        logMsg(`集火 ${CARD_DB[t.id].name}！`);
+      }
+    }
+    cleanupDead();
+    pendingAttackers=[];attackTarget=null;
+    if(checkWin())return;
+    runPhase('end_combat');
+  },500);
+  render();
+}
+function dealCombat(a,b){
+  const aFaction=CARD_DB[a.id].faction;
+  let atkBonus=(aFaction==='song'?1:0);
+  // 阵营相克
+  if(b&&FACTION_COUNTER[aFaction]===CARD_DB[b.id].faction)atkBonus++;
+  // 个人克制技能
+  const myPower=CARD_DB[a.id].power||'';
+  if(b){
+    if(myPower.includes('counter_jin')&&CARD_DB[b.id].faction==='jin')atkBonus++;
+    if(myPower.includes('counter_xixia')&&CARD_DB[b.id].faction==='xixia')atkBonus++;
+    if(myPower.includes('counter_song')&&CARD_DB[b.id].faction==='song')atkBonus++;
+    if(myPower.includes('counter_dali')&&CARD_DB[b.id].faction==='dali')atkBonus++;
+  }
+  if(b){
+    let aAtk=getAtk(a)+atkBonus;
+    if(a.deathtouch||CARD_DB[a.id].power==='deathtouch')b.damageTaken=99;
+    else b.damageTaken=(b.damageTaken||0)+aAtk;
+    if(CARD_DB[a.id].power==='lifelink'){G.my.life+=aAtk;logMsg(`抚绥，+${aAtk}威望。`);}
+    // 先发：若能杀死对方，对方不能反伤
+    const willKill=(b.damageTaken||0)>=getDef(b);
+    const hasFirst=CARD_DB[a.id].power&&CARD_DB[a.id].power.includes('first_strike');
+    if(!(hasFirst&&willKill))a.damageTaken=(a.damageTaken||0)+getDef(b);
+    if(aFaction==='dali')b.weaken=(b.weaken||0)-1;
+    if(aFaction==='jin'){const ex=aAtk-getDef(b);if(ex>0){G.enemy.life-=ex;logMsg(`破阵${ex}直冲！`);}}
+    logMsg(`${CARD_DB[a.id].name} 与 ${CARD_DB[b.id].name} 交战！`);
+  }else{
+    let aAtk=getAtk(a)+atkBonus;
+    G.enemy.life-=aAtk;
+    logMsg(`${CARD_DB[a.id].name} 直捣，-${aAtk}威望！`);
+  }
+}
+
+/* ---------- AI ---------- */
+function aiTakeTurn(){
+  if(!G||G.active!==1)return;
+  const ai=G.enemy;
+  const li=ai.hand.findIndex(c=>CARD_DB[c.id].type==='land');
+  if(li>=0&&ai.landsPlayedThisTurn<1){
+    const id=ai.hand[li].id;ai.lands.push({id,tapped:false});ai.manaMax++;
+    ai.hand.splice(li,1);ai.landsPlayedThisTurn++;
+    logMsg(`<span style="color:#a080ff">${ai.name}</span> 立 ${CARD_DB[id].name}。`);
+  }
+  ai.mana=0;
+  // 横置地产粮
+  ai.lands.forEach(l=>{if(!l.tapped){l.tapped=true;ai.mana++;}});
+  let acted=true;
+  while(acted){
+    acted=false;
+    const units=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>x.db.type==='unit'&&x.db.cost<=ai.mana).sort((a,b)=>b.db.cost-a.db.cost);
+    if(units.length){
+      const p=units[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);
+      ai.board.push({id:p.id,tapped:false,sick:true});
+      if(p.db.power==='draw1_etb')drawTo(ai,1);
+      if(p.db.power==='heal_both1_etb'){ai.life++;G.my.life++;}
+      logMsg(`<span style="color:#a080ff">${ai.name}</span> 派出 ${p.db.name}。`);acted=true;continue;
+    }
+    const sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>x.db.type==='sorcery'&&x.db.cost<=ai.mana);
+    if(sp.length){
+      const p=sp[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);ai.grave.push(p.id);
+      aiResolveSpell(p.db);acted=true;continue;
+    }
+  }
+  recomputeBoard();render();
+  setTimeout(()=>{
+    const atk=ai.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste')&&CARD_DB[c.id].power!=='cant_attack');
+    if(atk.length){
+      atk.forEach(c=>c.tapped=true);
+      const mine=G.my.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste'));
+      const pairs=[];
+      for(const a of [...atk].sort((x,y)=>getAtk(y)-getAtk(x))){
+        const can=mine.find(b=>getDef(b)>=getAtk(a));
+        if(can){can.tapped=true;pairs.push({a,b:can});mine.splice(mine.indexOf(can),1);}
+        else pairs.push({a,b:null});
+      }
+      for(const {a,b} of pairs){
+        const aFaction=CARD_DB[a.id].faction;
+        let atkBonus=(aFaction==='song'?1:0);
+        if(b&&FACTION_COUNTER[aFaction]===CARD_DB[b.id].faction)atkBonus++;
+        const myPower=CARD_DB[a.id].power||'';
+        if(b){
+          if(myPower.includes('counter_jin')&&CARD_DB[b.id].faction==='jin')atkBonus++;
+          if(myPower.includes('counter_xixia')&&CARD_DB[b.id].faction==='xixia')atkBonus++;
+          if(myPower.includes('counter_song')&&CARD_DB[b.id].faction==='song')atkBonus++;
+          if(myPower.includes('counter_dali')&&CARD_DB[b.id].faction==='dali')atkBonus++;
+        }
+        if(b){
+          let aAtk=getAtk(a)+atkBonus;
+          b.damageTaken=(b.damageTaken||0)+aAtk;
+          a.damageTaken=(a.damageTaken||0)+getDef(b);
+          if(aFaction==='dali')b.weaken=(b.weaken||0)-1;
+          if(aFaction==='jin'){
+            const excess=aAtk-getDef(b);
+            if(excess>0)G.my.life-=excess;
+          }
+        }else{
+          let aAtk=getAtk(a)+(aFaction==='song'?1:0);
+          G.my.life-=aAtk;logMsg(`${CARD_DB[a.id].name} 攻我大营，-${aAtk}！`);
+        }
+      }
+      cleanupDead();
+    }
+    if(checkWin())return;render();
+    setTimeout(()=>{
+      // AI 回合结束：加回合数，切回玩家
+      G.turn++;
+      if(checkWin())return;
+      G.active=0;
+      runPhase('untap');
+    },500);
+  },400);
+}
+function aiResolveSpell(db){
+  const me=G.enemy,opp=G.my;
+  switch(db.power){
+    case 'draw2':drawTo(me,2);break;
+    case 'heal5':me.life+=5;break;
+    case 'damage_player3':opp.life-=3;break;
+    case 'buff_board_0_2':me.board.forEach(c=>c.buffDef+=2);break;
+    case 'bonus_mana2':me.mana+=2;break;
+    case 'mutual_draw1_heal2':drawTo(me,1);drawTo(opp,1);me.life+=2;opp.life+=2;break;
+    case 'kill_small':{const s=opp.board.find(c=>getAtk(c)<=2);if(s){opp.grave.push(s.id);opp.board.splice(opp.board.indexOf(s),1);}break;}
+    case 'deal3_to_unit':case 'deal2_to_unit':{const t=opp.board[0];if(t)t.damageTaken=(t.damageTaken||0)+(db.power==='deal3_to_unit'?3:2);break;}
+    case 'weaken_1_1':{const t=opp.board[0];if(t)t.weaken=(t.weaken||0)-1;break;}
+    case 'sac_draw3':{if(me.board.length){const v=me.board.shift();me.grave.push(v.id);drawTo(me,3);}break;}
+  }
+}
+
+/* ---------- 菜单与流程 ---------- */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showRules(){showScreen('rules-screen');}
+function showFactions(){
+  showScreen('faction-info-screen');
+  const colorMap={song:'var(--zhu)',jin:'var(--jin-gold)',xixia:'var(--xixia-green)',dali:'var(--dali-purple)',neutral:'var(--neutral-blue)',pink:'var(--pink)',qi:'var(--ink-soft)'};
+  const desc={
+    song:'所有宋将攻击时+1攻。士气高昂，以热血弥补甲胄之缺。代表：岳飞、韩世忠、李纲',
+    jin:'金将破甲：超额伤害直接打玩家。铁浮屠重骑，破阵后直冲中军。代表：完颜粘罕、金兀术、铁浮屠',
+    xixia:'西夏将敏捷：召唤当回合即可攻击。草场牧场养出的轻骑，来去如风。代表：李元昊、野利遇乞',
+    dali:'大理将攻击后挂-1/-1。蛊毒巫术，攻完还削弱对手。代表：段和誉、高观音',
+    neutral:'中立将无阵营加成，灵活应变。外交牌多，抽牌解场为主。代表：李清照、金富轼',
+    pink:'后妃光环：同场将+0/+1。宠冠六宫，抚绥三军。代表：韦贤妃、邢秉懿',
+    qi:'伪齐将无加成，见风使舵。投机之辈，随时倒戈。代表：刘豫、秦桧'
+  };
+  document.getElementById('faction-list').innerHTML=Object.entries(FACTIONS).map(([k,f])=>{
+    const c=colorMap[k]||'#888';
+    return `<div style="background:var(--paper-deep);border-left:4px solid ${c};padding:14px;border-radius:6px">
+      <div style="font-size:16px;font-weight:700;color:${c};margin-bottom:6px">${f.name}</div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">关键词：${f.kw}</div>
+      <div style="font-size:13px;line-height:1.6">${desc[k]||''}</div>
+    </div>`;
+  }).join('');
+}
+function showReplays(){
+  showScreen('replay-screen');
+  document.getElementById('replay-view').style.display='none';
+  document.getElementById('replay-list').style.display='block';
+  const replays=JSON.parse(localStorage.getItem('shaosong_replays')||'[]');
+  const el=document.getElementById('replay-list');
+  if(replays.length===0){el.innerHTML='<p style="color:var(--ink-soft);text-align:center;padding:40px">暂无对局录像</p>';return;}
+  el.innerHTML=replays.map((r,i)=>{
+    const myF=FACTIONS[r.myFaction]||{name:'宋'};
+    const enF=FACTIONS[r.enemyFaction]||{name:'金'};
+    const resColor=r.result==='胜'?'var(--song)':'var(--jin)';
+    return `<div onclick="viewReplay(${i})" style="padding:12px;background:var(--paper-deep);margin-bottom:8px;border-radius:6px;cursor:pointer;border-left:3px solid ${resColor}">
+      <div style="font-weight:700">${r.myFaction?myF.name:'?'} vs ${r.enemyFaction?enF.name:'?'} — <span style="color:${resColor}">${r.result}</span></div>
+      <div style="font-size:12px;color:var(--ink-soft)">${r.date} · ${r.turn}回合</div>
+    </div>`;
+  }).join('');
+}
+function viewReplay(i){
+  const replays=JSON.parse(localStorage.getItem('shaosong_replays')||'[]');
+  const r=replays[i];if(!r)return;
+  document.getElementById('replay-list').style.display='none';
+  document.getElementById('replay-view').style.display='flex';
+  document.getElementById('replay-log').innerHTML=r.log.map(l=>`<div>› ${l}</div>`).join('');
+}
+function backToMenu(){document.getElementById('end-overlay').classList.remove('active');showScreen('menu-screen');G=null;}
+function quitGame(){if(confirm('确定投降？'))backToMenu();}
+
+function buildFactionGrid(){
+  const grid=document.getElementById('faction-grid');
+  const descs={
+    song:'红 · 士气进攻，低费人海，殉国buff',
+    jin:'金 · 重甲破阵，装备加持，高费碾压',
+    xixia:'绿 · 牧场产粮，敏捷快攻，经济制胜',
+    dali:'紫 · 蛊毒削弱，巫蛊debuff，控制流',
+  };
+  grid.innerHTML=Object.entries(FACTIONS).filter(([k])=>['song','jin','xixia','dali'].includes(k)).map(([k,f])=>{
+    return `<div class="faction-card f-${k}" onclick="pickFaction('${k}')"><h3>${f.name}</h3><p>${descs[k]||''}</p></div>`;
+  }).join('');
+}
+let pendingFactionChoice='ai';
+function showFactionSelect(){pendingFactionChoice='ai';buildFactionGrid();showScreen('faction-screen');}
+function showLocalFaction(){pendingFactionChoice='local';buildFactionGrid();showScreen('faction-screen');}
+let localPick=null;
+function pickFaction(f){
+  if(pendingFactionChoice==='ai'){
+    const enemy=f==='song'?'jin':(f==='jin'?'song':'jin');
+    showScreen('game-screen');
+    initGame('ai',f,enemy);
+  }else{
+    if(!localPick){localPick=f;buildFactionGrid();document.querySelector('#faction-screen h2').textContent='对手阵营';return;}
+    showScreen('game-screen');initGame('local',localPick,f);localPick=null;
+  }
+}
+
+/* 联机（占位） */
+function showOnlineMenu(){showScreen('online-screen');}
+function hostRoom(){document.getElementById('room-status').textContent='联机功能开发中，敬请期待。';}
+function joinRoom(){document.getElementById('room-status').textContent='联机功能开发中，敬请期待。';}
+
+/* ============================================================
+ * 图鉴
+ * ============================================================ */
+let codexFilter='all';
+function showCodex(){
+  showScreen('codex-screen');
+  buildCodexFilter();
+  renderCodex();
+}
+function buildCodexFilter(){
+  const filters=[['all','全部'],['unit','将领'],['sorcery','名品'],['instant','计策'],['land','州府'],
+    ['song','宋红'],['jin','金黄'],['xixia','夏绿'],['dali','大理紫'],['neutral','中立蓝'],['pink','后宫粉'],['token','衍生物']];
+  document.getElementById('codex-filter').innerHTML=filters.map(([k,v])=>
+    `<button class="action-btn" style="padding:6px 14px;font-size:12px;background:${codexFilter===k?'var(--zhu)':'var(--paper)'};color:${codexFilter===k?'#fff':'var(--ink)'}" onclick="codexFilter='${k}';buildCodexFilter();renderCodex()">${v}</button>`
+  ).join('');
+}
+function renderCodex(){
+  const grid=document.getElementById('codex-grid');
+  let cards;
+  if(codexFilter==='token'){
+    cards=Object.entries(CARD_DB).filter(([id,c])=>c.isToken);
+  } else {
+    cards=Object.entries(CARD_DB).filter(([id,c])=>!c.isToken);
+  }
+  const filtered=cards.filter(([id,c])=>{
+    if(codexFilter==='all'||codexFilter==='token') return true;
+    if(['unit','sorcery','instant','land'].includes(codexFilter)) return c.type===codexFilter;
+    return c.faction===codexFilter;
+  });
+  grid.innerHTML=filtered.map(([id,c])=>{
+    const cost=c.cost!==undefined?c.cost:'·';
+    const stats=c.type==='unit'?`${c.atk}/${c.def}`:'';
+    const art=c.type==='unit'?c.name[0]:c.type==='land'?'府':'计';
+    return `<div class="card" data-id="${id}" style="background:var(--paper);border:2px solid var(--ink);padding:6px;border-radius:4px;position:relative;cursor:default">
+      <div style="position:absolute;top:-4px;left:-4px;width:22px;height:22px;border-radius:50%;background:var(--qing);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700">${cost}</div>
+      <div style="text-align:center;font-weight:700;font-size:13px;padding:2px;background:var(--ink);color:#fff;margin-bottom:4px">${c.name}</div>
+      <div style="height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;border-radius:2px;margin-bottom:4px;background:linear-gradient(135deg,var(--${c.faction==='song'?'zhu':c.faction==='jin'?'jin-gold':c.faction==='xixia'?'xixia-green':c.faction==='dali'?'dali-purple':c.faction==='pink'?'pink':'neutral-blue'}),var(--ink-soft))">${art}</div>
+      <div style="font-size:10px;color:var(--ink-soft);line-height:1.3;min-height:30px">${c.text||''}</div>
+      ${stats?`<div style="position:absolute;bottom:-4px;right:-4px;background:var(--tie);padding:1px 6px;font-size:12px;font-weight:700;border-radius:2px">${stats}</div>`:''}
+    </div>`;
+  }).join('');
+  // 图鉴悬停
+  grid.querySelectorAll('.card').forEach(el=>{
+    el.onmouseenter=()=>showTooltip(el);
+    el.onmouseleave=hideTooltip;
+  });
+}
+
+/* ============================================================
+ * 组牌器
+ * ============================================================ */
+let builderDeck=[];
+let builderFaction='song';
+let builderFilter='all';
+function openDeckBuilder(){
+  showScreen('builder-screen');
+  builderDeck=[];
+  buildBuilderFilter();
+  renderBuilderPool();
+  renderBuilderDecklist();
+}
+function buildBuilderFilter(){
+  const filters=[['all','全部'],['unit','将领'],['sorcery','计策'],['land','州府']];
+  document.getElementById('builder-filter').innerHTML=filters.map(([k,v])=>
+    `<button class="action-btn" style="padding:6px 12px;font-size:12px;background:${builderFilter===k?'var(--zhu)':'var(--paper)'};color:${builderFilter===k?'#fff':'var(--ink)'}" onclick="builderFilter='${k}';buildBuilderFilter();renderBuilderPool()">${v}</button>`
+  ).join('')+`<select id="builder-faction" onchange="builderFaction=this.value;renderBuilderPool()" style="padding:6px;font-size:12px">
+    <option value="song">宋</option><option value="jin">金</option><option value="xixia">西夏</option><option value="dali">大理</option>
+  </select>`;
+  document.getElementById('builder-faction').value=builderFaction;
+}
+function renderBuilderPool(){
+  const pool=Object.entries(CARD_DB).filter(([id,c])=>{
+    if(c.isToken) return false;
+    if(builderFilter!=='all' && c.type!==builderFilter) return false;
+    if(c.faction!==builderFaction && c.faction!=='neutral' && c.faction!=='pink') return false;
+    return true;
+  });
+  document.getElementById('builder-pool').innerHTML=pool.map(([id,c])=>{
+    const count=builderDeck.filter(x=>x===id).length;
+    const max=4;
+    const cost=c.cost!==undefined?c.cost:'·';
+    const stats=c.type==='unit'?`${c.atk}/${c.def}`:'';
+    const art=c.type==='unit'?c.name[0]:c.type==='land'?'府':'计';
+    const colorVar=c.faction==='song'?'zhu':c.faction==='jin'?'jin-gold':c.faction==='xixia'?'xixia-green':c.faction==='dali'?'dali-purple':c.faction==='pink'?'pink':'neutral-blue';
+    return `<div onclick="builderAdd('${id}')" style="background:var(--paper);border:2px solid ${count>0?'var(--tie)':'var(--ink)'};padding:4px;border-radius:4px;cursor:pointer;position:relative;${count>=max?'opacity:.4':''}">
+      <div style="position:absolute;top:-4px;left:-4px;width:20px;height:20px;border-radius:50%;background:var(--qing);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700">${cost}</div>
+      <div style="text-align:center;font-weight:700;font-size:11px;padding:2px;background:var(--ink);color:#fff">${c.name}${count>0?` ×${count}`:''}</div>
+      <div style="height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--${colorVar}),var(--ink-soft));margin:3px 0;border-radius:2px">${art}</div>
+      <div style="font-size:9px;color:var(--ink-soft)">${c.text||''}</div>
+      ${stats?`<div style="position:absolute;bottom:-4px;right:-4px;background:var(--tie);padding:1px 5px;font-size:11px;font-weight:700">${stats}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function builderAdd(id){
+  const count=builderDeck.filter(x=>x===id).length;
+  if(count>=4) return;
+  const landCount=builderDeck.filter(x=>CARD_DB[x].type==='land').length;
+  if(CARD_DB[id].type==='land' && landCount>=24) return;
+  if(builderDeck.length>=60) return;
+  builderDeck.push(id);
+  renderBuilderPool();renderBuilderDecklist();
+}
+function builderRemove(id){
+  const i=builderDeck.lastIndexOf(id);
+  if(i>=0) builderDeck.splice(i,1);
+  renderBuilderPool();renderBuilderDecklist();
+}
+function renderBuilderDecklist(){
+  const landCount=builderDeck.filter(x=>CARD_DB[x].type==='land').length;
+  document.getElementById('builder-count').textContent=`${builderDeck.length}/60 张（地 ${landCount}/22-24）`;
+  const grouped={};
+  builderDeck.forEach(id=>{grouped[id]=(grouped[id]||0)+1;});
+  document.getElementById('builder-decklist').innerHTML=Object.entries(grouped).sort((a,b)=>{
+    const ca=CARD_DB[a[0]],cb=CARD_DB[b[0]];
+    return (ca.cost||0)-(cb.cost||0)||ca.name.localeCompare(cb.name);
+  }).map(([id,n])=>{
+    const c=CARD_DB[id];
+    return `<div onclick="builderRemove('${id}')" style="padding:3px 4px;font-size:11px;cursor:pointer;border-bottom:1px dotted var(--ink-soft)">
+      <b>${n}</b>× ${c.name} <span style="color:var(--hui)">${c.cost??''}费</span>
+    </div>`;
+  }).join('')||'<p style="color:var(--hui);font-size:11px">点左侧卡牌加入</p>';
+}
+function clearDeck(){builderDeck=[];renderBuilderPool();renderBuilderDecklist();}
+function randomFill(){
+  builderDeck=[];
+  const pool=Object.entries(CARD_DB).filter(([id,c])=>!c.isToken && (c.faction===builderFaction||c.faction==='neutral'||c.faction==='pink')).map(([id])=>id);
+  const lands=pool.filter(id=>CARD_DB[id].type==='land');
+  const nonLands=pool.filter(id=>CARD_DB[id].type!=='land');
+  for(let i=0;i<23;i++) builderDeck.push(lands[Math.floor(Math.random()*lands.length)]);
+  while(builderDeck.length<60){
+    const id=nonLands[Math.floor(Math.random()*nonLands.length)];
+    if(builderDeck.filter(x=>x===id).length>=4) continue;
+    builderDeck.push(id);
+  }
+  renderBuilderPool();renderBuilderDecklist();
+}
+function playCustomDeck(){
+  const landCount=builderDeck.filter(x=>CARD_DB[x].type==='land').length;
+  if(builderDeck.length!==60){alert('牌组必须60张，当前'+builderDeck.length);return;}
+  if(landCount<22||landCount>24){alert('地牌需22-24张，当前'+landCount);return;}
+  showScreen('game-screen');
+  // 用自定义牌组开局
+  const enemyFaction=builderFaction==='song'?'jin':'song';
+  G={mode:'ai',turn:1,active:0,phase:'main',
+    my:{faction:builderFaction,name:'你',deck:[...builderDeck].sort(()=>Math.random()-.5),hand:[],board:[],lands:[],grave:[],life:20,mana:0,manaMax:0,landsPlayedThisTurn:0},
+    enemy:newPlayer(enemyFaction,enemyFaction==='song'?'赵官家':'大金朗主'),
+    myFaction:builderFaction,online:null,selectedCard:null,needChooseTarget:null,log:[],
+    mulliganCount:0,mulliganPhase:true};
+  drawTo(G.my,7);drawTo(G.enemy,7);
+  document.getElementById('my-faction-tag').textContent=FACTIONS[builderFaction].tag;
+  document.getElementById('my-faction-tag').className='faction-tag f-tag-'+builderFaction;
+  document.getElementById('enemy-faction-tag').textContent=FACTIONS[enemyFaction].tag;
+  document.getElementById('enemy-faction-tag').className='faction-tag f-tag-'+enemyFaction;
+  logMsg(`出师！<span class="hl">${G.my.name}</span> 自整${builderDeck.length}张牌。调度手牌。`);
+  render();showMulliganUI();
+}
+
+/* 启动时构建 */
+buildFactionGrid();
+</script>
+</body>
+</html>
