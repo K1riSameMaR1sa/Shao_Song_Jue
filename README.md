@@ -52,3 +52,60 @@
 ## 致谢
 原著：榴弹怕水《绍宋》
 灵感：Magic: The Gathering、三国杀
+
+---
+
+# Shao Song Jue (English)
+
+A browser-based trading card game (TCG) set during the Southern Song dynasty, based on the time-travel novel *Shao Song* by Liu Dan Pa Shui. Rules inspired by Magic: The Gathering. Single self-contained HTML file.
+
+## Version v24
+
+### Features
+- **AI Battles**: Greedy play + auto-blocking
+- **Custom Deck**: 60 cards (22-24 lands), max 4 copies per card
+- **Full MTG Phase Flow**: Untap → Upkeep → Draw → Precombat Main → Combat → Postcombat Main → End → Cleanup. Manually advance with "Next Phase" button
+- **d20 Dice Roll**: Choose high/low to decide first player
+- **Mulligan**: Free redraw
+- **Hover Tooltip**: Full card details on hover
+- **Collapsible Draggable Battle Log**
+- **Replay System**: Last 20 matches saved in localStorage
+- **Card Codex**: Filter by faction / type / token
+- **Mobile Responsive**: Scaled cards, horizontal hand scroll
+
+### Faction Color Wheel
+| Faction | Color | Trait |
+|---|---|---|
+| Song | Red | +1/+0 to your attackers (morale) |
+| Jin | Gold | Trample (excess damage hits player) |
+| Xixia | Green | Haste (summoning sickness bypass) |
+| Dali | Purple | -1/-1 counter after attacking (gu poison) |
+| Neutral | Blue | Flexible, versatile |
+| Harem | Pink | Center, supports all factions |
+| Qi | Gray | Opportunistic |
+
+**Counter cycle**: Song → Jin → Xixia → Dali → Song (+1 attack vs countered faction)
+**Ally cycle**: Adjacent allies get +0/+1
+**Harem**: Supports all factions from center
+
+### Card Types
+- **Units**: Attack/defense creatures (120+)
+- **Lands**: Mono-color, dual-color (6), exotic colorless (Rome/Constantinople/Dashi/Tianzhu)
+- **Sorceries**: Main phase only (includes history books: Sun Zi Bing Fa / Chun Qiu / Zuo Zhuan / Shi Ji / Zi Zhi Tong Jian / Lun Yu / Meng Zi / Li Ji)
+- **Instants**: Any phase (Mo Xu You / Qing Jun Ce / Xi Shui Zhai / Wu Gu / Kong Que Dan etc.)
+- **Tokens**: Cavalry 2/2 Haste, Axemen 2/3, Archer 1/2 Deathtouch, Guard 0/3 Ward
+
+### Keywords
+Deathtouch, Haste, Ward/Indestructible, Vigilance, Trample, Reach, Lifelink, First Strike, Rampage, Divination, Cultivation, Bloodbath, Reverse, Diplomacy, Relief, Fortify, Martyrdom
+
+## Run Locally
+Open `绍宋决.html` in any browser. No server needed.
+
+## Tech Stack
+- Single-file HTML (inline CSS + vanilla JS)
+- No frameworks, no build tools
+- localStorage for replays and decks
+
+## Credits
+Original novel: *Shao Song* by Liu Dan Pa Shui
+Rules inspiration: Magic: The Gathering, Legends of the Three Kingdoms
