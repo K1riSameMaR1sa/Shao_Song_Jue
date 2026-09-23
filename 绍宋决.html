@@ -141,6 +141,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showReplays()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">对局录像</button>
     <button class="menu-btn" onclick="showFactions()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">阵营特性</button>
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
+    <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">项目</button>
     <button class="menu-btn" onclick="showHowto()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏说明</button>
   </div>
   <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v7</div>
@@ -248,6 +249,40 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p><b>将领</b>：攻防单位，可攻击可阻挡。<b>州府</b>：产粮地。<b>计策</b>：一次性效果。<b>衍生物</b>：由技能召唤（骑兵2/2敏捷、刀斧手2/3、弓箭手1/2穿喉、亲兵0/3铁壁）。</p>
     <h3>八、地牌</h3>
     <p>单色地产1粮。双色地可产两种色费。异国无色地：罗马（找地）、君士坦丁堡（-1血）、大食港（抽牌）、天竺（回血）。</p>
+  </div>
+</div>
+
+<!-- 项目 -->
+<div id="project-screen" class="screen" style="padding:0">
+  <div style="width:100%;max-width:800px;height:100%;overflow-y:auto;padding:24px;line-height:1.8;font-size:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="letter-spacing:4px">绍 宋 决</h2>
+      <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+    </div>
+    <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
+    <h3>项目简介</h3>
+    <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
+    <h3>当前版本 v22</h3>
+    <ul>
+      <li>120+ 张卡牌：宋金夏理中立后宫伪齐七阵营</li>
+      <li>完整 MTG 阶段流（12 阶段手动推进）</li>
+      <li>颜色轮：相克环（宋→金→夏→理→宋）、相生环（相邻盟友+0/+1）、后宫居中牵制</li>
+      <li>关键词：穿喉、敏捷、死守、列阵、陷阵、先发、抚绥、破阵、庙算等</li>
+      <li>名品（sorcery）与计策（instant）分类</li>
+      <li>双色地、异国无色地（罗马/君士坦丁堡/大食/天竺）</li>
+      <li>衍生物系统（骑兵/刀斧手/弓箭手/亲兵）</li>
+      <li>d20 猜先、调度、AI 对战、自定义牌组、卡牌图鉴、录像回放</li>
+      <li>悬停看详情、可折叠可拖动战报面板</li>
+    </ul>
+    <h3>路线图</h3>
+    <ul>
+      <li>在线联机对战（PeerJS）</li>
+      <li>更多三十六计瞬间牌</li>
+      <li>装备牌与坐骑系统扩展</li>
+      <li>武将连携关系网可视化</li>
+    </ul>
+    <h3>致谢</h3>
+    <p>原著：榴弹怕水《绍宋》<br>规则灵感：Magic: The Gathering、三国杀</p>
   </div>
 </div>
 
@@ -474,6 +509,14 @@ const CARD_DB = {
   /* ===== 通用计策 ===== */
   guozhai:   {name:"国债", type:"sorcery", faction:"neutral", cost:1, text:"抽2张", power:"draw2"},
   baihe:     {name:"白河郊游图", type:"sorcery", faction:"song", cost:2, text:"名品：抽2牌，本回合将+1/+0", power:"draw2_buff_1_0"},
+  sunzi:     {name:"孙子兵法", type:"sorcery", faction:"neutral", cost:3, text:"名品：所有将+2/+0（知己知彼）", power:"buff_board_2_0"},
+  chunqiu:   {name:"春秋", type:"sorcery", faction:"song", cost:2, text:"名品：抽2牌（微言大义）", power:"draw2"},
+  zuozhuan:  {name:"左传", type:"sorcery", faction:"neutral", cost:2, text:"名品：查看对手手牌，抽1牌", power:"look_hand_draw1"},
+  shiji:     {name:"史记", type:"sorcery", faction:"neutral", cost:3, text:"名品：所有将+1/+1（通古今之变）", power:"buff_board_1_1"},
+  zizhi:     {name:"资治通鉴", type:"sorcery", faction:"neutral", cost:4, text:"名品：双方各抽3牌（鉴前世兴衰）", power:"both_draw3"},
+  lunyu:     {name:"论语", type:"sorcery", faction:"song", cost:1, text:"名品：回3血（仁者爱人）", power:"heal3"},
+  mengzi:    {name:"孟子", type:"sorcery", faction:"song", cost:2, text:"名品：宋将+2/+0（浩然之气）", power:"song_buff_2_0"},
+  liji:      {name:"礼记", type:"sorcery", faction:"song", cost:2, text:"名品：所有将获得铁壁（克己复礼）", power:"all_ward"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1054,6 +1097,13 @@ function resolveSpell(power,ti){
   switch(power){
     case 'draw2':drawTo(me,2);logMsg('抽2牌。');break;
     case 'draw2_buff_1_0':drawTo(me,2);me.board.forEach(c=>c.buffAtk+=1);logMsg('白河郊游图：抽2，本回合将+1攻。');break;
+    case 'buff_board_2_0':me.board.forEach(c=>c.buffAtk+=2);logMsg('孙子兵法：所有将+2攻。');break;
+    case 'buff_board_1_1':me.board.forEach(c=>{c.buffAtk++;c.buffDef++;});logMsg('史记：所有将+1/+1。');break;
+    case 'both_draw3':drawTo(me,3);drawTo(opp,3);logMsg('资治通鉴：双方各抽3。');break;
+    case 'heal3':me.life+=3;logMsg('论语：威望+3。');break;
+    case 'song_buff_2_0':me.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffAtk+=2;});logMsg('孟子：宋将+2攻。');break;
+    case 'all_ward':me.board.forEach(c=>c.ward=true);logMsg('礼记：所有将获得铁壁。');break;
+    case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
     case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
     case 'buff_board_0_2':me.board.forEach(c=>c.buffDef+=2);logMsg('坚壁清野，+0/+2。');break;
@@ -1511,6 +1561,7 @@ function aiResolveSpell(db){
 /* ---------- 菜单与流程 ---------- */
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function showRules(){showScreen('rules-screen');}
+function showProject(){showScreen('project-screen');}
 function showFactions(){
   showScreen('faction-info-screen');
   const colorMap={song:'var(--zhu)',jin:'var(--jin-gold)',xixia:'var(--xixia-green)',dali:'var(--dali-purple)',neutral:'var(--neutral-blue)',pink:'var(--pink)',qi:'var(--ink-soft)'};
