@@ -2,7 +2,9 @@
 
 基于穿越小说《绍宋》（榴弹怕水 著）的网页卡牌对战游戏，规则类似万智牌（MTG），单 HTML 文件自包含。
 
-## 当前版本 v24
+## 当前版本 v1.0.0-beta
+
+> 版本规则：单次更新改动 >5 项为大版本（v1.0→v2.0），≤5 项为小版本（v1.0.1→v1.0.2），均带 `-beta` 后缀。
 
 ### 已实现功能
 - **AI 对战**：贪心出牌 + 自动选阻挡
@@ -59,7 +61,7 @@
 
 A browser-based trading card game (TCG) set during the Southern Song dynasty, based on the time-travel novel *Shao Song* by Liu Dan Pa Shui. Rules inspired by Magic: The Gathering. Single self-contained HTML file.
 
-## Version v24
+## Version v1.0.0-beta
 
 ### Features
 - **AI Battles**: Greedy play + auto-blocking
