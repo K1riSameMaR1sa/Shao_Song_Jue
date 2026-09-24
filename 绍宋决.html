@@ -367,7 +367,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
   </div>
 </div>
 
-<div id="deck-preview-screen" class="screen">
+<div id="deck-preview-screen" class="screen" style="justify-content:flex-start;overflow-y:auto;padding-bottom:60px">
   <h2 style="margin-bottom:20px;letter-spacing:6px">预 组 套 牌</h2>
   <div id="deck-preview-content" style="max-width:800px;margin:0 auto;text-align:left"></div>
   <div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
@@ -2143,12 +2143,28 @@ function showDeckPreview(){
     html+=`<h3 style="color:${colors[f]};margin:0 0 8px 0">${names[f]}（${cards.length}张）</h3>`;
     html+='<div style="font-size:13px;line-height:1.8">';
     cards.forEach(([id,c])=>{
-      html+=`<span style="display:inline-block;margin:2px 6px;padding:2px 6px;background:rgba(0,0,0,0.3);border-radius:3px">${c.name}（${c.cost||0}费 ${c.type==='unit'?c.atk+'/'+c.def:c.type==='land'?'地':c.type==='instant'?'瞬':c.type==='item'?'名':''}）</span>`;
+      html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 6px;padding:4px 8px;background:rgba(0,0,0,0.3);border-radius:3px">${c.name}（${c.cost||0}费 ${c.type==='unit'?c.atk+'/'+c.def:c.type==='land'?'地':c.type==='instant'?'瞬':c.type==='item'?'名':''}）</span>`;
     });
     html+='</div></div>';
   });
   document.getElementById('deck-preview-content').innerHTML=html;
   showScreen('deck-preview-screen');
+}
+function showCardDetail(id){
+  const c=CARD_DB[id];if(!c)return;
+  const typeMap={unit:'将领',land:'州府',instant:'瞬间',item:'名品',spell:'法术'};
+  const factionMap={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立（蓝）',pink:'后宫（粉）'};
+  const html=`
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">
+      <div style="background:linear-gradient(135deg,#2c1810,#1a0f0a);border:2px solid #d4a017;border-radius:8px;padding:24px;max-width:400px;width:90%;color:#f0e6d2" onclick="event.stopPropagation()">
+        <h2 style="margin:0 0 8px 0;color:#d4a017">${c.name}</h2>
+        <p style="margin:4px 0;font-size:13px;color:#aaa">${factionMap[c.faction]||''} · ${typeMap[c.type]||c.type} · ${c.cost||0}费${c.type==='unit'?` · ${c.atk}/${c.def}`:''}</p>
+        <hr style="border-color:#d4a01733;margin:12px 0">
+        <p style="line-height:1.8;font-size:14px">${c.text||'无特殊效果'}</p>
+        <button class="menu-btn ghost" style="margin-top:16px;width:100%" onclick="this.closest('[style*=fixed]').remove()">关闭</button>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
 }
 function showLocalFaction(){pendingFactionChoice='local';buildFactionGrid();showScreen('faction-screen');}
 let localPick=null;
