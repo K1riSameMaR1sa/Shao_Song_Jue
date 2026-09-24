@@ -292,7 +292,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
     <h3>当前版本 v3.0.0-beta</h3>
     <ul>
-      <li>120+ 张卡牌：宋金夏理中立后宫伪齐七阵营</li>
+      <li>120+ 张卡牌：宋金夏理中立后宫六阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
       <li>颜色轮：相克环（宋→金→夏→理→宋）、相生环（相邻盟友+0/+1）、后宫居中牵制</li>
       <li>关键词：穿喉、敏捷、死守、列阵、陷阵、先发、抚绥、破阵、庙算等</li>
@@ -464,7 +464,6 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 const FACTIONS = {
   song:  {name:'宋 · 红', tag:'宋', cls:'song', kw:'士气·动员·殉国'},
   jin:   {name:'金 · 金', tag:'金', cls:'jin', kw:'破甲·铁壁·装备'},
-  qi:    {name:'伪齐', tag:'伪', cls:'qi', kw:'投机'},
   xixia: {name:'西夏 · 绿', tag:'夏', cls:'xixia', kw:'牧场·敏捷·产粮'},
   dali:  {name:'大理 · 紫', tag:'理', cls:'dali', kw:'蛊毒·巫术·削弱'},
   neutral:{name:'中立 · 蓝', tag:'中', cls:'neutral', kw:'外交·谋略·抽牌'},
@@ -478,7 +477,6 @@ const FACTION_POWERS = {
   dali:  '理将攻击后挂-1/-1（蛊毒）；相生：与夏同场+0/+1；相克：攻宋将+1',
   neutral:'中立将无加成；相生：与宋/后宫同场+0/+1',
   pink:  '后妃光环：同场将+0/+1；相生：与中立同场+0/+1',
-  qi:    '伪齐将无加成，见风使舵',
 };
 // 相克：克方→被克方
 const FACTION_COUNTER={song:'jin',jin:'xixia',xixia:'dali',dali:'song'};
@@ -1844,15 +1842,14 @@ function showRules(){showScreen('rules-screen');}
 function showProject(){showScreen('project-screen');}
 function showFactions(){
   showScreen('faction-info-screen');
-  const colorMap={song:'var(--zhu)',jin:'var(--jin-gold)',xixia:'var(--xixia-green)',dali:'var(--dali-purple)',neutral:'var(--neutral-blue)',pink:'var(--pink)',qi:'var(--ink-soft)'};
+  const colorMap={song:'var(--zhu)',jin:'var(--jin-gold)',xixia:'var(--xixia-green)',dali:'var(--dali-purple)',neutral:'var(--neutral-blue)',pink:'var(--pink)'};
   const desc={
     song:'所有宋将攻击时+1攻。士气高昂，以热血弥补甲胄之缺。代表：岳飞、韩世忠、李纲',
     jin:'金将破甲：超额伤害直接打玩家。铁浮屠重骑，破阵后直冲中军。代表：完颜粘罕、金兀术、铁浮屠',
     xixia:'西夏将敏捷：召唤当回合即可攻击。草场牧场养出的轻骑，来去如风。代表：李元昊、野利遇乞',
     dali:'大理将攻击后挂-1/-1。蛊毒巫术，攻完还削弱对手。代表：段和誉、高观音',
     neutral:'中立将无阵营加成，灵活应变。外交牌多，抽牌解场为主。代表：李清照、金富轼',
-    pink:'后妃光环：同场将+0/+1。宠冠六宫，抚绥三军。代表：韦贤妃、邢秉懿',
-    qi:'伪齐将无加成，见风使舵。投机之辈，随时倒戈。代表：刘豫、秦桧'
+    pink:'后妃光环：同场将+0/+1。宠冠六宫，抚绥三军。代表：韦贤妃、邢秉懿'
   };
   document.getElementById('faction-list').innerHTML=Object.entries(FACTIONS).map(([k,f])=>{
     const c=colorMap[k]||'#888';
