@@ -874,6 +874,8 @@ const CARD_DB = {
   lingnan:   {name:"岭南商路", type:"land", faction:"neutral", text:"双色：可产宋粮或理粮", dual:['song','dali']},
   liangshanpo:{name:"梁山泊", type:"land", faction:"neutral", text:"八百里水泊：产1粮；召唤水浒将时，此地产费视为2费"},
   jiyitang:  {name:"聚义堂", type:"land", faction:"neutral", text:"替天行道：产1粮；召唤水浒将时，此地产费视为2费"},
+  lianhuanma:{name:"连环马", type:"spell", faction:"neutral", cost:3, text:"名品：本回合我方所有中立将+2/+0并获得敏捷", power:"lianhuanma_etb"},
+  goulianqiang:{name:"钩镰枪", type:"spell", faction:"neutral", cost:4, text:"瞬间：康对手本回合一次攻击宣告；若目标是金将，额外造3伤", power:"goulianqiang_etb"},
   goryeo:    {name:"高丽口岸", type:"land", faction:"neutral", text:"双色：可产金粮或中立粮", dual:['jin','neutral']},
   /* 异国无色地（找地地） */
   luoma:     {name:"罗马城", type:"land", faction:"neutral", text:"无色：登场时找一张地牌入战场", fetch:true},
@@ -1536,6 +1538,24 @@ function resolveSpell(power,ti){
       opp.hand.push(t);opp.board.splice(ti,1);
       logMsg(`浣洗院北狩，${CARD_DB[t.id].name}被遣返手牌。`);break;
     }
+    case 'lianhuanma_etb':{
+      p.board.forEach(c=>{
+        if(CARD_DB[c.id].faction==='neutral'){
+          c.buffAtk=(c.buffAtk||0)+2;
+          c.givenHaste=true;
+        }
+      });
+      logMsg('连环马冲锋！中立将+2/+0并敏捷。');break;
+    }
+    case 'goulianqiang_etb':{
+      // 康攻击宣告：本回合对手不能宣告攻击
+      G.enemy.cantAttack=true;
+      logMsg('钩镰枪破阵！对手本回合不能宣告攻击。');
+      // 若对手场上有金将，造3伤
+      const jinTarget=opp.board.find(c=>CARD_DB[c.id].faction==='jin');
+      if(jinTarget){jinTarget.damageTaken=(jinTarget.damageTaken||0)+3;logMsg(`钩镰枪专破铁浮屠，对${CARD_DB[jinTarget.id].name}造3伤！`);}
+      break;
+    }
     case 'equip_2_2':{
       const t=me.board.find(c=>CARD_DB[c.id].faction==='jin');
       if(t){t.buffAtk+=2;t.buffDef+=2;logMsg(`铁浮屠披挂于 ${CARD_DB[t.id].name}，+2/+2。`);}
@@ -1790,6 +1810,7 @@ function runPhase(ph){
       break;
     case 'cleanup':
       logMsg('—— 清除阶段，回合结束 ——');
+      G.enemy.cantAttack=false;G.my.cantAttack=false;
       break;
   }
   recomputeBoard();
@@ -1798,6 +1819,7 @@ function runPhase(ph){
 
 function declareAttackers(){
   if(G.active!==0||(G.phase!=='precombat_main'&&G.phase!=='begin_combat'))return;
+  if(G.my.cantAttack){logMsg('钩镰枪破阵！本回合不能宣告攻击。');return;}
   const canAttack=G.my.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste'))&&!hasPower(c,'cant_attack'));
   if(canAttack.length===0){logMsg('无可攻之将。');return;}
   G.phase='declare_attack';
