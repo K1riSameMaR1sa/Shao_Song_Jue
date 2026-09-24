@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v1.0.3-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v2.0.0-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -290,7 +290,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v1.0.3-beta</h3>
+    <h3>当前版本 v2.0.0-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫伪齐七阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -555,6 +555,20 @@ const CARD_DB = {
   chenmo:    {name:"沉默", type:"instant", faction:"neutral", cost:2, text:"瞬间：康掉对手下一个法术/瞬间", power:"counter_next"},
   fengbo:    {name:"封驳", type:"instant", faction:"song", cost:1, text:"瞬间：康掉对手下一个名品（不能康计策）", power:"counter_sorcery_only"},
   duanzhang: {name:"断章", type:"instant", faction:"neutral", cost:3, text:"瞬间：康掉对手下一个法术/瞬间，且抽1牌", power:"counter_next_draw1"},
+  /* 莫须有同位 */
+  zhaoyu:    {name:"诏狱", type:"instant", faction:"neutral", cost:1, text:"瞬间：消灭一个攻≤1的敌将", power:"kill_tiny"},
+  dasili:    {name:"大理寺审",type:"instant",faction:"song",cost:3,text:"瞬间：消灭一个任意敌将，抽1牌", power:"kill_any_draw1"},
+  /* 清君侧同位 */
+  bangshu:   {name:"谤书", type:"instant", faction:"neutral", cost:1, text:"瞬间：对手威望-2", power:"damage_player2"},
+  fengtian:  {name:"奉天讨罪",type:"instant",faction:"song",cost:3,text:"瞬间：对手-5威望，己方+2威望", power:"damage_player5_heal2"},
+  /* 突袭水寨同位 */
+  jieying:   {name:"劫营", type:"instant", faction:"neutral", cost:1, text:"瞬间：对一个敌将造2伤", power:"deal2_to_unit"},
+  huoshao:   {name:"火烧连营",type:"instant",faction:"jin",cost:3,text:"瞬间：对所有敌将造2伤", power:"deal2_all_enemy"},
+  /* 巫蛊同位 */
+  wudu:      {name:"五毒教", type:"instant", faction:"dali", cost:3, text:"瞬间：目标将-2/-2直到回合结束", power:"weaken_2_2"},
+  /* 孔雀胆同位 */
+  duzhen:    {name:"毒针", type:"instant", faction:"dali", cost:1, text:"瞬间：对一个将造1伤，穿喉", power:"deal1_deathtouch"},
+  qianji:    {name:"牵机药", type:"instant", faction:"dali", cost:3, text:"瞬间：对一个将造4伤，对手-1威望", power:"deal4_to_unit_damage1"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1156,7 +1170,7 @@ function onHandCardClick(idx){
   }
   playCard(idx);
 }
-function needsTarget(p){return ['kill_small','deal3_to_unit','deal2_to_unit','weaken_1_1','bounce_one_enemy'].includes(p);}
+function needsTarget(p){return ['kill_small','kill_tiny','kill_any_draw1','deal3_to_unit','deal2_to_unit','weaken_1_1','weaken_2_2','deal1_deathtouch','deal4_to_unit_damage1','bounce_one_enemy'].includes(p);}
 function playCard(handIdx,targetIdx){
   const cid=G.my.hand[handIdx].id;const db=CARD_DB[cid];
   G.my.mana-=db.cost;
@@ -1251,6 +1265,38 @@ function resolveSpell(power,ti){
       const t=opp.board[ti];
       opp.grave.push(t.id);opp.board.splice(ti,1);
       logMsg(`莫须有诛杀 ${CARD_DB[t.id].name}！`);break;
+    }
+    case 'kill_tiny':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];
+      if(getAtk(t)>1){logMsg('该将攻>1，不可指定。break;');break;}
+      opp.grave.push(t.id);opp.board.splice(ti,1);
+      logMsg(`诏狱诛杀 ${CARD_DB[t.id].name}！`);break;
+    }
+    case 'kill_any_draw1':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];
+      opp.grave.push(t.id);opp.board.splice(ti,1);
+      drawTo(me,1);
+      logMsg(`大理寺审诛 ${CARD_DB[t.id].name}，抽1牌。`);break;
+    }
+    case 'damage_player2':opp.life-=2;logMsg('谤书，对手-2威望！');break;
+    case 'damage_player5_heal2':opp.life-=5;me.life+=2;logMsg('奉天讨罪！对手-5，己方+2威望。');break;
+    case 'deal2_all_enemy':opp.board.forEach(t=>{t.damageTaken=(t.damageTaken||0)+2;});logMsg('火烧连营，所有敌将造2伤！');cleanupDead();break;
+    case 'weaken_2_2':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];t.weaken=(t.weaken||0)-2;
+      logMsg(`五毒教，${CARD_DB[t.id].name} -2/-2。`);break;
+    }
+    case 'deal1_deathtouch':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];t.damageTaken=99;
+      logMsg(`毒针穿喉，${CARD_DB[t.id].name} 即刻毙命！`);cleanupDead();break;
+    }
+    case 'deal4_to_unit_damage1':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];t.damageTaken=(t.damageTaken||0)+4;opp.life-=1;
+      logMsg(`牵机药，${CARD_DB[t.id].name} 造4伤，对手-1威望。`);cleanupDead();break;
     }
     case 'deal3_to_unit':case 'deal2_to_unit':{
       if(ti===undefined)break;
@@ -1716,6 +1762,14 @@ function aiResolveSpell(db){
     case 'bonus_mana2':me.mana+=2;break;
     case 'mutual_draw1_heal2':drawTo(me,1);drawTo(opp,1);me.life+=2;opp.life+=2;break;
     case 'kill_small':{const s=opp.board.find(c=>getAtk(c)<=2);if(s){opp.grave.push(s.id);opp.board.splice(opp.board.indexOf(s),1);}break;}
+    case 'kill_tiny':{const s=opp.board.find(c=>getAtk(c)<=1);if(s){opp.grave.push(s.id);opp.board.splice(opp.board.indexOf(s),1);}break;}
+    case 'kill_any_draw1':{const s=opp.board[0];if(s){opp.grave.push(s.id);opp.board.splice(0,1);drawTo(me,1);}break;}
+    case 'damage_player2':opp.life-=2;break;
+    case 'damage_player5_heal2':opp.life-=5;me.life+=2;break;
+    case 'deal2_all_enemy':opp.board.forEach(t=>t.damageTaken=(t.damageTaken||0)+2);break;
+    case 'weaken_2_2':{const t=opp.board[0];if(t)t.weaken=(t.weaken||0)-2;break;}
+    case 'deal1_deathtouch':{const t=opp.board[0];if(t)t.damageTaken=99;break;}
+    case 'deal4_to_unit_damage1':{const t=opp.board[0];if(t){t.damageTaken=(t.damageTaken||0)+4;opp.life-=1;}break;}
     case 'deal3_to_unit':case 'deal2_to_unit':{const t=opp.board[0];if(t)t.damageTaken=(t.damageTaken||0)+(db.power==='deal3_to_unit'?3:2);break;}
     case 'weaken_1_1':{const t=opp.board[0];if(t)t.weaken=(t.weaken||0)-1;break;}
     case 'sac_draw3':{if(me.board.length){const v=me.board.shift();me.grave.push(v.id);drawTo(me,3);}break;}
