@@ -2279,27 +2279,87 @@ let pendingFactionChoice='ai';
 function showFactionSelect(){pendingFactionChoice='ai';buildFactionGrid();showScreen('faction-screen');}
 function showDeckPreview(){
   const factions=['song','jin','xixia','dali','neutral','pink','song_pink'];
-  const colors={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e63',song_pink:'linear-gradient(90deg,#c0392b,#c97b8a)'};
+  const colors={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e63',song_pink:'#c97b8a'};
   const names={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立梁山（蓝）',pink:'后宫（粉）',song_pink:'红粉双色（宋+后宫）'};
   let html='';
   factions.forEach(f=>{
     const deck=buildDeck(f);
-    const cards=deck.map(id=>CARD_DB[id]);
-    const landCount=cards.filter(c=>c.type==='land').length;
-    const costs={};
-    cards.forEach(c=>{const cost=c.cost||0;costs[cost]=(costs[cost]||0)+1;});
-    html+=`<div style="margin-bottom:20px;padding:12px;border-left:4px solid ${colors[f]};background:rgba(255,255,255,0.05)">`;
-    html+=`<h3 style="color:${colors[f]};margin:0 0 4px 0">${names[f]}</h3>`;
-    html+=`<p style="margin:0 0 8px 0;font-size:12px;color:#aaa">60张 · 地${landCount}张 · 费用分布：`;
-    Object.keys(costs).sort((a,b)=>a-b).forEach(k=>{html+=`${k}费×${costs[k]} `;});
-    html+='</p>';
-    html+='<div style="font-size:13px;line-height:1.8">';
-    // 按费用排序
-    const sorted=cards.map((c,i)=>({c,id:deck[i]})).sort((a,b)=>(a.c.cost||0)-(b.c.cost||0));
-    sorted.forEach(({c,id})=>{
-      html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 6px;background:rgba(0,0,0,0.3);border-radius:3px;font-size:12px">${c.name}${c.type==='unit'?`(${c.atk}/${c.def})`:''}</span>`;
+    // 备牌15张：从同阵营非地牌随机选
+    const factions=f.split('_');
+    const sbPool=Object.entries(CARD_DB).filter(([id,c])=>{
+      if(c.isToken||c.type==='land')return false;
+      if(c.faction==='neutral')return true;
+      return factions.includes(c.faction);
+    }).map(([id])=>id);
+    const sideboard=[];
+    for(let i=0;i<15;i++)sideboard.push(sbPool[Math.floor(Math.random()*sbPool.length)]);
+    
+    const cards=deck.map(id=>({id,c:CARD_DB[id]}));
+    const landCount=cards.filter(x=>x.c.type==='land').length;
+    const unitCount=cards.filter(x=>x.c.type==='unit').length;
+    const instantCount=cards.filter(x=>x.c.type==='instant').length;
+    const itemCount=cards.filter(x=>x.c.type==='item'||x.c.type==='sorcery').length;
+    
+    // mana曲线
+    const costs=[0,0,0,0,0,0,0,0];
+    cards.forEach(x=>{const cost=Math.min(x.c.cost||0,7);costs[cost]++;});
+    const maxCost=Math.max(...costs,1);
+    
+    html+=`<div style="margin-bottom:24px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden">`;
+    // 头部
+    html+=`<div style="padding:16px;background:linear-gradient(135deg,${colors[f]}33,transparent);border-bottom:1px solid ${colors[f]}44">`;
+    html+=`<h3 style="color:${colors[f]};margin:0 0 4px 0;font-size:18px">${names[f]}</h3>`;
+    html+=`<p style="margin:0;font-size:12px;color:#aaa">主牌60张（地${landCount}/将${unitCount}/法术${itemCount}/瞬间${instantCount}） · 备牌15张</p>`;
+    html+=`</div>`;
+    
+    // mana曲线图
+    html+=`<div style="padding:16px;display:flex;gap:16px;align-items:flex-end">`;
+    html+=`<div style="flex:1;display:flex;align-items:flex-end;gap:4px;height:120px;padding:0 8px">`;
+    costs.forEach((count,i)=>{
+      const h=count>0?Math.max(count/maxCost*100,8):2;
+      html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">`;
+      html+=`<div style="font-size:11px;color:#fff;margin-bottom:2px">${count||''}</div>`;
+      html+=`<div style="width:100%;background:${colors[f]};border-radius:3px 3px 0 0;height:${h}%;min-height:2px"></div>`;
+      html+=`<div style="font-size:10px;color:#aaa;margin-top:2px">${i===7?'7+':i}</div>`;
+      html+=`</div>`;
     });
-    html+='</div></div>';
+    html+=`</div>`;
+    // 类型统计
+    html+=`<div style="width:100px;font-size:12px;line-height:2">`;
+    html+=`<div>🏔 地 ${landCount}</div>`;
+    html+=`<div>⚔ 将 ${unitCount}</div>`;
+    html+=`<div>📜 名品 ${itemCount}</div>`;
+    html+=`<div>⚡ 瞬间 ${instantCount}</div>`;
+    html+=`</div>`;
+    html+=`</div>`;
+    
+    // 主牌列表按费用分组
+    html+=`<div style="padding:0 16px 16px">`;
+    html+=`<h4 style="margin:8px 0;font-size:14px;color:#fff">主牌（60）</h4>`;
+    const grouped={};
+    cards.forEach(x=>{
+      const cost=x.c.cost||0;
+      if(!grouped[cost])grouped[cost]=[];
+      grouped[cost].push(x);
+    });
+    Object.keys(grouped).sort((a,b)=>a-b).forEach(cost=>{
+      html+=`<div style="margin:6px 0">`;
+      html+=`<span style="display:inline-block;background:${colors[f]};color:#000;font-size:11px;padding:1px 8px;border-radius:3px;margin-right:8px;font-weight:bold">${cost===0?'地':cost+'费'}</span>`;
+      grouped[cost].forEach(x=>{
+        html+=`<span onclick="showCardDetail('${x.id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 8px;background:rgba(0,0,0,0.4);border-radius:3px;font-size:12px">${x.c.name}${x.c.type==='unit'?` ${x.c.atk}/${x.c.def}`:''}</span>`;
+      });
+      html+=`</div>`;
+    });
+    
+    // 备牌
+    html+=`<h4 style="margin:12px 0 4px;font-size:14px;color:#aaa">备牌（15）</h4>`;
+    html+=`<div style="font-size:12px">`;
+    sideboard.forEach(id=>{
+      const c=CARD_DB[id];
+      html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:2px 6px;background:rgba(0,0,0,0.2);border-radius:3px;font-size:11px;color:#ccc">${c.name}</span>`;
+    });
+    html+=`</div>`;
+    html+=`</div></div>`;
   });
   document.getElementById('deck-preview-content').innerHTML=html;
   showScreen('deck-preview-screen');
