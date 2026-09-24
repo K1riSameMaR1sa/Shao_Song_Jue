@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.2.1-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.2.2-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -290,7 +290,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v3.2.1-beta</h3>
+    <h3>当前版本 v3.2.2-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫六阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -307,7 +307,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <h3>更新归档</h3>
     <div id="update-archive" style="margin-bottom:20px">
       <div style="border:1px solid var(--ink-soft);border-radius:4px;margin-bottom:8px">
-        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.2.1-beta ▸</div>
+        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.2.2-beta ▸</div>
         <div style="padding:10px 14px;display:none;line-height:1.8">
           <ul>
             <li>套牌查看界面重做：mana曲线图+类型统计+按费用分组+15张备牌</li>
@@ -1176,8 +1176,8 @@ function rollDice(pick){
 function beginGame(myFirst){
   const {mode,myFaction,enemyFaction,opts}=pendingGameConfig;
   G={mode,turn:1,active:0,phase:'untap',
-    my:newPlayer(myFaction,FACTIONS[myFaction].name+(myFaction==='song'?'主公':'朗主')),
-    enemy:newPlayer(enemyFaction,FACTIONS[enemyFaction].name+(enemyFaction==='jin'?'朗主':'主公')),
+    my:newPlayer(myFaction,(FACTIONS[myFaction]?FACTIONS[myFaction].name:'红粉')+(myFaction==='song'?'主公':'朗主')),
+    enemy:newPlayer(enemyFaction,(FACTIONS[enemyFaction]?FACTIONS[enemyFaction].name:'红粉')+(enemyFaction==='jin'?'朗主':'主公')),
     myFaction,online:opts.online||null,selectedCard:null,needChooseTarget:null,log:[],
     mulliganCount:0,mulliganPhase:true,myFirst:myFirst};
   drawTo(G.my,7);drawTo(G.enemy,7);
@@ -1476,8 +1476,8 @@ function playCard(handIdx,targetIdx){
     if(db.power==='token_etb_archer'){G.my.board.push({id:'token_archer',tapped:false,sick:true});logMsg(`「${db.name}」召来弓箭手！`);}
     if(db.power==='token_minfu_etb'){G.my.board.push({id:'token_minfu',tapped:false,sick:true});G.my.board.push({id:'token_minfu',tapped:false,sick:true});logMsg(`「${db.name}」召来2民夫！`);}
     if(db.power==='token_nü_etb'){G.my.board.push({id:'token_nü',tapped:false,sick:true});logMsg(`「${db.name}」召来1女奴！`);}
-    if(db.power==='tongsheng_xiang'){G.my.hand.push('ligun');logMsg('同生：李衮入手牌。');}
-    if(db.power==='tongsheng_ligun'){G.my.hand.push('xiangchong');logMsg('同生：项充入手牌。');}
+    if(db.power==='tongsheng_xiang'){if(CARD_DB['ligun'])G.my.hand.push('ligun');logMsg('同生：李衮入手牌。');}
+    if(db.power==='tongsheng_ligun'){if(CARD_DB['xiangchong'])G.my.hand.push('xiangchong');logMsg('同生：项充入手牌。');}
     if(db.power==='shaoyong_etb'){
       const roll=Math.floor(Math.random()*20)+1;
       if(roll<=10){drawTo(G.my,1);logMsg(`邵雍梅花易数掷${roll}：抽1。`);}
@@ -2078,20 +2078,20 @@ function aiTakeTurn(){
     acted=false;
     // 2. 出牌：优先下能出的最便宜的单位（避免卡手），而不是最贵的
     const units=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]}))
-      .filter(x=>x.db.type==='unit'&&x.db.cost<=ai.mana)
+      .filter(x=>x.db&&x.db.type==='unit'&&x.db.cost<=ai.mana)
       .sort((a,b)=>a.db.cost-b.db.cost);
     if(units.length){
       const p=units[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);
       ai.board.push({id:p.id,tapped:false,sick:true});
       if(p.db.power==='draw1_etb')drawTo(ai,1);
       if(p.db.power==='heal_both1_etb'){ai.life++;G.my.life++;}
-      if(p.db.power==='tongsheng_xiang'){ai.hand.push('ligun');}
-      if(p.db.power==='tongsheng_ligun'){ai.hand.push('xiangchong');}
+      if(p.db.power==='tongsheng_xiang'&&CARD_DB['ligun']){ai.hand.push('ligun');}
+      if(p.db.power==='tongsheng_ligun'&&CARD_DB['xiangchong']){ai.hand.push('xiangchong');}
       logMsg(`<span style="color:#a080ff">${ai.name}</span> 派出 ${p.db.name}。`);acted=true;continue;
     }
     // 3. 法术/瞬间：优先用有直接收益的（抽牌、回血、伤害、清场），跳过纯防御的
     let sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]}))
-      .filter(x=>(x.db.type==='sorcery'||x.db.type==='instant'||x.db.type==='item')&&x.db.cost<=ai.mana);
+      .filter(x=>x.db&&(x.db.type==='sorcery'||x.db.type==='instant'||x.db.type==='item')&&x.db.cost<=ai.mana);
     if(G.my.yuanxue){
       const protectPowers=['kill_small','deal3_to_unit','deal2_to_unit','weaken_1_1','bounce_one_enemy'];
       sp=sp.filter(x=>!protectPowers.includes(x.db.power));
