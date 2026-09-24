@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v2.0.0-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.0.0-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -290,7 +290,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v2.0.0-beta</h3>
+    <h3>当前版本 v3.0.0-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫伪齐七阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -569,6 +569,19 @@ const CARD_DB = {
   /* 孔雀胆同位 */
   duzhen:    {name:"毒针", type:"instant", faction:"dali", cost:1, text:"瞬间：对一个将造1伤，穿喉", power:"deal1_deathtouch"},
   qianji:    {name:"牵机药", type:"instant", faction:"dali", cost:3, text:"瞬间：对一个将造4伤，对手-1威望", power:"deal4_to_unit_damage1"},
+  /* 宋朝名人 */
+  shaoyong:  {name:"邵雍", type:"unit", faction:"song", cost:4, atk:2, def:4, text:"登场掷d20：1-10抽1，11-15回2血，16-20对手-2威望", power:"shaoyong_etb"},
+  /* 西夏名人 */
+  liang_taihou:{name:"梁太后",type:"unit",faction:"xixia",cost:3,atk:2,def:4,text:"摄政：夏将+0/+1；登场重置所有夏地", power:"liang_etb"},
+  weiming_awu:{name:"嵬名阿吴",type:"unit",faction:"xixia",cost:3,atk:4,def:2,text:"先发；攻理将+1", power:"first_strike;counter_dali"},
+  /* 大理名人 */
+  gaoshengtai:{name:"高升泰",type:"unit",faction:"dali",cost:4,atk:4,def:3,text:"权臣：理将+1/+0；登场对手弃1牌", power:"gaoshengtai_etb"},
+  duansiping:{name:"段思平",type:"unit",faction:"dali",cost:5,atk:5,def:5,text:"大理太祖：理将+1/+1；抚绥", power:"lord_dali;lifelink"},
+  /* 名品牌 */
+  wuhou:     {name:"武侯羽扇", type:"sorcery", faction:"neutral", cost:3, text:"名品：所有将+1/+0，获得敏捷", power:"buff_board_1_0_haste"},
+  zhouyu:    {name:"周瑜纶巾", type:"sorcery", faction:"song", cost:2, text:"名品：一个将+1/+1，获得先发", power:"buff_one_1_1_first"},
+  qimen:     {name:"诸葛奇门", type:"sorcery", faction:"neutral", cost:4, text:"名品：对手下回合不能重置地（寸步难行）", power:"qimen_etb"},
+  meihua:    {name:"梅花易数", type:"sorcery", faction:"song", cost:2, text:"名品：掷d20，1-10抽2，11-20看对手手牌", power:"meihua_etb"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1016,6 +1029,9 @@ function recomputeBoard(){
     if(p.board.some(c=>c.id==='liyuanhao')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='xixia'){c.buffAtk++;c.buffDef++;}});
     if(p.board.some(c=>c.id==='wanyan_aguda')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin'){c.buffAtk++;c.buffDef++;}});
     if(p.board.some(c=>c.id==='ligang')) p.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffAtk++;});
+    if(p.board.some(c=>c.id==='liang_taihou'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='xixia')c.buffDef++;});
+    if(p.board.some(c=>c.id==='gaoshengtai'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='dali')c.buffAtk++;});
+    if(p.board.some(c=>c.id==='duansiping'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='dali'){c.buffAtk++;c.buffDef++;}});
     // 李世辅 vs 金将
     p.board.forEach(c=>{if(c.id==='lishifu'&&p.board.some(x=>CARD_DB[x.id].faction==='jin'))c.buffAtk+=2;});
     // 相生：同场盟友阵营+0/+1
@@ -1194,6 +1210,14 @@ function playCard(handIdx,targetIdx){
     if(db.power==='token_etb_ax'){G.my.board.push({id:'token_ax',tapped:false,sick:true});logMsg(`「${db.name}」召来刀斧手！`);}
     if(db.power==='token_etb_cav'||db.power==='haste_token_cav'){G.my.board.push({id:'token_cav',tapped:false,sick:true});logMsg(`「${db.name}」召来骑兵！`);}
     if(db.power==='token_etb_archer'){G.my.board.push({id:'token_archer',tapped:false,sick:true});logMsg(`「${db.name}」召来弓箭手！`);}
+    if(db.power==='shaoyong_etb'){
+      const roll=Math.floor(Math.random()*20)+1;
+      if(roll<=10){drawTo(G.my,1);logMsg(`邵雍梅花易数掷${roll}：抽1。`);}
+      else if(roll<=15){G.my.life+=2;logMsg(`邵雍掷${roll}：回2血。`);}
+      else{G.enemy.life-=2;logMsg(`邵雍掷${roll}：对手-2威望！`);}
+    }
+    if(db.power==='liang_etb'){G.my.lands.forEach(l=>l.tapped=false);logMsg('梁太后摄政，重置所有夏地。');}
+    if(db.power==='gaoshengtai_etb'){if(G.enemy.hand.length){G.enemy.hand.pop();logMsg('高升泰专权，对手弃1牌。');}}
     if(db.power==='opp_discard_etb'){const c=G.enemy.hand.pop();if(c){G.enemy.grave.push(c);logMsg(`「${db.name}」命令，对手弃1牌。`);}}
   }else if(db.type==='sorcery'||db.type==='instant'){
     G.my.grave.push(cid);
@@ -1265,6 +1289,22 @@ function resolveSpell(power,ti){
       me.counterDraw1=true;
       logMsg('「断章」：对手下一个法术/瞬间将被康，康后抽1。');
       break;
+    case 'buff_board_1_0_haste':me.board.forEach(c=>{c.buffAtk++;c.givenHaste=true;});logMsg('武侯羽扇：所有将+1攻，敏捷。');break;
+    case 'buff_one_1_1_first':{
+      if(!me.board.length){logMsg('无将可施加。');break;}
+      const t=me.board[0];t.buffAtk++;t.buffDef++;t.givenFirstStrike=true;
+      logMsg(`周瑜纶巾：${CARD_DB[t.id].name} +1/+1，先发。`);break;
+    }
+    case 'qimen_etb':
+      opp.qimenNextTurn=true;
+      logMsg('诸葛奇门：对手下回合地不能重置。');
+      break;
+    case 'meihua_etb':{
+      const roll=Math.floor(Math.random()*20)+1;
+      if(roll<=10){drawTo(me,2);logMsg(`梅花易数掷${roll}：抽2牌。`);}
+      else{logMsg(`梅花易数掷${roll}：对手手牌${opp.hand.length}张。`);}
+      break;
+    }
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
     case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
@@ -1521,7 +1561,12 @@ function runPhase(ph){
   const p=G.my;
   switch(ph){
     case 'untap':
-      p.lands.forEach(l=>l.tapped=false);
+      if(p.qimenNextTurn){
+        logMsg('诸葛奇门：地不能重置！');
+        p.qimenNextTurn=false;
+      }else{
+        p.lands.forEach(l=>l.tapped=false);
+      }
       p.board.forEach(c=>{c.tapped=false;c.sick=false;c.weaken=0;});
       p.manaMax=p.lands.length;
       p.mana=p.manaMax+(p.permanentManaBonus||0);
