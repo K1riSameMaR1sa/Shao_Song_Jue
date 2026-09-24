@@ -1972,6 +1972,7 @@ function dealCombat(a,b){
 function aiTakeTurn(){
   if(!G||G.active!==1)return;
   const ai=G.enemy;
+  // 1. 下地（每回合只下一张）
   const li=ai.hand.findIndex(c=>CARD_DB[c.id].type==='land');
   if(li>=0&&ai.landsPlayedThisTurn<1){
     const id=ai.hand[li].id;ai.lands.push({id,tapped:false});ai.manaMax++;
@@ -1979,41 +1980,49 @@ function aiTakeTurn(){
     logMsg(`<span style="color:#a080ff">${ai.name}</span> 立 ${CARD_DB[id].name}。`);
   }
   ai.mana=0;
-  // 横置地产粮
   ai.lands.forEach(l=>{if(!l.tapped){l.tapped=true;ai.mana++;}});
   let acted=true;
   while(acted){
     acted=false;
-    const units=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>x.db.type==='unit'&&x.db.cost<=ai.mana).sort((a,b)=>b.db.cost-a.db.cost);
+    // 2. 出牌：优先下能出的最便宜的单位（避免卡手），而不是最贵的
+    const units=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]}))
+      .filter(x=>x.db.type==='unit'&&x.db.cost<=ai.mana)
+      .sort((a,b)=>a.db.cost-b.db.cost);
     if(units.length){
       const p=units[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);
       ai.board.push({id:p.id,tapped:false,sick:true});
       if(p.db.power==='draw1_etb')drawTo(ai,1);
       if(p.db.power==='heal_both1_etb'){ai.life++;G.my.life++;}
+      if(p.db.power==='tongsheng_xiang'){ai.hand.push('ligun');}
+      if(p.db.power==='tongsheng_ligun'){ai.hand.push('xiangchong');}
       logMsg(`<span style="color:#a080ff">${ai.name}</span> 派出 ${p.db.name}。`);acted=true;continue;
     }
-    let sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>(x.db.type==='sorcery'||x.db.type==='instant')&&x.db.cost<=ai.mana);
-    // 推崇原学：对手计策不能指定我方场上将
+    // 3. 法术/瞬间：优先用有直接收益的（抽牌、回血、伤害、清场），跳过纯防御的
+    let sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]}))
+      .filter(x=>(x.db.type==='sorcery'||x.db.type==='instant'||x.db.type==='item')&&x.db.cost<=ai.mana);
     if(G.my.yuanxue){
       const protectPowers=['kill_small','deal3_to_unit','deal2_to_unit','weaken_1_1','bounce_one_enemy'];
       sp=sp.filter(x=>!protectPowers.includes(x.db.power));
     }
+    // 优先级排序：伤害>抽牌>清场>其他
+    const priority={deal3_to_unit:10,deal2_to_unit:9,deal1_deathtouch:8,kill_small:10,kill_tiny:9,kill_any_draw1:10,
+      deal2_all_enemy:10,weaken_2_2:6,bounce_one_enemy:7,capture_one:8,
+      lianhuanma_etb:7,goulianqiang_etb:6,chongxue:5,chongjiao:5,equip_2_2:6,equip_haste:6,equip_1_1_draw:7};
+    sp.sort((a,b)=>(priority[b.db.power]||1)-(priority[a.db.power]||1));
     if(sp.length){
       const p=sp[0];
-      // 检查counter
       let countered=false;
       if(G.my.counterSpell){
         countered=true;
         logMsg(`「${CARD_DB[p.id].name}」被康！`);
-        if(G.my.counterDraw1){drawTo(G.my,1);logMsg('断章：抽1牌。');G.my.counterDraw1=false;}
+        if(G.my.counterDraw1){drawTo(G.my,1);G.my.counterDraw1=false;}
         G.my.counterSpell=false;
-      }else if(G.my.counterSorceryOnly&&p.db.type==='sorcery'){
+      }else if(G.my.counterSorceryOnly&&(p.db.type==='sorcery'||p.db.type==='item')){
         countered=true;
         logMsg(`「${CARD_DB[p.id].name}」被封驳康掉！`);
         G.my.counterSorceryOnly=false;
       }
       if(countered){
-        /* 牌回手，不结算 */
         ai.hand.splice(p.i,1);
         ai.hand.push(p.id);
         continue;
@@ -2024,15 +2033,22 @@ function aiTakeTurn(){
   }
   recomputeBoard();render();
   setTimeout(()=>{
+    // 4. 攻击优化：高攻打玩家，低攻打阻挡者换杀
     const atk=ai.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste'))&&!hasPower(c,'cant_attack'));
     if(atk.length){
       atk.forEach(c=>c.tapped=true);
       const mine=G.my.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste')));
       const pairs=[];
+      // 高攻（>=3）直接打玩家，低攻（<3）尝试换杀阻挡者
       for(const a of [...atk].sort((x,y)=>getAtk(y)-getAtk(x))){
-        const can=mine.find(b=>getDef(b)>=getAtk(a));
-        if(can){can.tapped=true;pairs.push({a,b:can});mine.splice(mine.indexOf(can),1);}
-        else pairs.push({a,b:null});
+        if(getAtk(a)>=3){
+          pairs.push({a,b:null}); // 高攻直冲玩家
+        }else{
+          // 低攻找能杀死的阻挡者
+          const can=mine.find(b=>getAtk(a)>=getDef(b)&&getDef(b)>=getAtk(a));
+          if(can){can.tapped=true;pairs.push({a,b:can});mine.splice(mine.indexOf(can),1);}
+          else pairs.push({a,b:null});
+        }
       }
       for(const {a,b} of pairs){
         const aFaction=CARD_DB[a.id].faction;
@@ -2063,7 +2079,6 @@ function aiTakeTurn(){
     }
     if(checkWin())return;render();
     setTimeout(()=>{
-      // AI 回合结束：加回合数，切回玩家
       G.turn++;
       if(checkWin())return;
       G.active=0;
