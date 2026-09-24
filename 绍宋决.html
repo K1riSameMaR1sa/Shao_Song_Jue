@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.2.3-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.2.4-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -290,7 +290,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v3.2.3-beta</h3>
+    <h3>当前版本 v3.2.4-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫六阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -307,7 +307,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <h3>更新归档</h3>
     <div id="update-archive" style="margin-bottom:20px">
       <div style="border:1px solid var(--ink-soft);border-radius:4px;margin-bottom:8px">
-        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.2.3-beta ▸</div>
+        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.2.4-beta ▸</div>
         <div style="padding:10px 14px;display:none;line-height:1.8">
           <ul>
             <li>套牌查看界面重做：mana曲线图+类型统计+按费用分组+15张备牌</li>
@@ -2341,31 +2341,31 @@ function renderDeckPreview(){
     html+=`<div style="margin:6px 0">`;
     html+=`<span style="display:inline-block;background:${colors[f]};color:#000;font-size:11px;padding:1px 8px;border-radius:3px;margin-right:8px;font-weight:bold">${cost===0?'地':cost+'费'}</span>`;
     grouped[cost].forEach(x=>{
-      html+=`<span onclick="showCardDetail('${x.id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 8px;background:rgba(0,0,0,0.4);border-radius:3px;font-size:12px">${x.c.name}${x.c.type==='unit'?` ${x.c.atk}/${x.c.def}`:''}</span>`;
+      html+=`<span onclick="showCardDetail('${x.id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:4px 10px;background:rgba(255,255,255,0.15);border:1px solid ${colors[f]};border-radius:4px;font-size:13px;color:#fff;font-weight:500">${x.c.name}${x.c.type==='unit'?` ${x.c.atk}/${x.c.def}`:''}</span>`;
     });
     html+=`</div>`;
   });
-  html+=`<h4 style="margin:12px 0 4px;font-size:14px;color:#aaa">备牌（15）</h4>`;
+  html+=`<h4 style="margin:12px 0 4px;font-size:14px;color:#888">备牌（15）</h4>`;
   html+=`<div style="font-size:12px">`;
   sideboard.forEach(id=>{
     const c=CARD_DB[id];
-    html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:2px 6px;background:rgba(0,0,0,0.2);border-radius:3px;font-size:11px;color:#ccc">${c.name}</span>`;
+    html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 8px;background:rgba(0,0,0,0.3);border:1px dashed #666;border-radius:4px;font-size:11px;color:#999">${c.name}</span>`;
   });
   html+=`</div></div></div>`;
   document.getElementById('deck-preview-content').innerHTML=html;
 }
 function showCardDetail(id){
   const c=CARD_DB[id];if(!c)return;
-  const typeMap={unit:'将领',land:'州府',instant:'瞬间',item:'名品',spell:'法术'};
+  const typeMap={unit:'将领',land:'州府',instant:'瞬间',item:'名品',spell:'法术',sorcery:'名品'};
   const factionMap={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立（蓝）',pink:'后宫（粉）'};
   const html=`
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center" onclick="this.remove()">
-      <div style="background:linear-gradient(135deg,#2c1810,#1a0f0a);border:2px solid #d4a017;border-radius:8px;padding:24px;max-width:400px;width:90%;color:#f0e6d2" onclick="event.stopPropagation()">
-        <h2 style="margin:0 0 8px 0;color:#d4a017">${c.name}</h2>
-        <p style="margin:4px 0;font-size:13px;color:#aaa">${factionMap[c.faction]||''} · ${typeMap[c.type]||c.type} · ${c.cost||0}费${c.type==='unit'?` · ${c.atk}/${c.def}`:''}</p>
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" onclick="this.remove()">
+      <div style="background:linear-gradient(135deg,#2c1810,#1a0f0a);border:2px solid #d4a017;border-radius:8px;padding:20px;max-width:400px;width:100%;max-height:85vh;overflow-y:auto;color:#f0e6d2" onclick="event.stopPropagation()">
+        <h2 style="margin:0 0 8px 0;color:#d4a017;font-size:18px">${c.name}</h2>
+        <p style="margin:4px 0;font-size:12px;color:#c9b896">${factionMap[c.faction]||''} · ${typeMap[c.type]||c.type} · ${c.cost||0}费${c.type==='unit'?` · ${c.atk}/${c.def}`:''}</p>
         <hr style="border-color:#d4a01733;margin:12px 0">
-        <p style="line-height:1.8;font-size:14px">${c.text||'无特殊效果'}</p>
-        <button class="menu-btn ghost" style="margin-top:16px;width:100%" onclick="this.closest('[style*=fixed]').remove()">关闭</button>
+        <p style="line-height:1.8;font-size:14px;color:#f0e6d2">${c.text||'无特殊效果'}</p>
+        <button class="menu-btn ghost" style="margin-top:16px;width:100%;padding:10px" onclick="this.closest('[style*=fixed]').remove()">关闭</button>
       </div>
     </div>`;
   document.body.insertAdjacentHTML('beforeend',html);
@@ -2422,7 +2422,7 @@ function renderCodex(){
     const cost=c.cost!==undefined?c.cost:'·';
     const stats=c.type==='unit'?`${c.atk}/${c.def}`:'';
     const art=c.type==='unit'?c.name[0]:c.type==='land'?'府':'计';
-    return `<div class="card" data-id="${id}" style="background:var(--paper);border:2px solid var(--ink);padding:6px;border-radius:4px;position:relative;cursor:default">
+    return `<div class="card" data-id="${id}" style="background:var(--paper);border:2px solid var(--ink);padding:6px;border-radius:4px;position:relative;cursor:pointer" onclick="showCardDetail('${id}')">
       <div style="position:absolute;top:-4px;left:-4px;width:22px;height:22px;border-radius:50%;background:var(--qing);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700">${cost}</div>
       <div style="text-align:center;font-weight:700;font-size:13px;padding:2px;background:var(--ink);color:#fff;margin-bottom:4px">${c.name}</div>
       <div style="height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;border-radius:2px;margin-bottom:4px;background:linear-gradient(135deg,var(--${c.faction==='song'?'zhu':c.faction==='jin'?'jin-gold':c.faction==='xixia'?'xixia-green':c.faction==='dali'?'dali-purple':c.faction==='pink'?'pink':'neutral-blue'}),var(--ink-soft))">${art}</div>
