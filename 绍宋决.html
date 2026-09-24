@@ -650,12 +650,12 @@ const CARD_DB = {
   wanyan_sheng:{name:"完颜吴乞买",type:"unit",faction:"jin",cost:4,atk:3,def:4,text:"金太宗", power:null},
   wanyan_xiyin:{name:"完颜希尹",type:"unit",faction:"jin",cost:2,atk:1,def:3,text:"制文字：登场抽1", power:"draw1_etb"},
   wanyan_aguda:{name:"完颜阿骨打",type:"unit",faction:"jin",cost:6,atk:6,def:6,text:"太祖：金将+1/+1", power:"lord_jin"},
-  wanyan_luoshi:{name:"完颜娄室",type:"unit",faction:"jin",cost:4,atk:5,def:4,text:"破辽灭宋：先发；穿喉", power:"first_strike;deathtouch"},
+  wanyan_luoshi:{name:"完颜娄室",type:"unit",faction:"jin",cost:4,atk:5,def:4,text:"破辽灭宋：先发；穿喉；击杀将后再召1骑兵", power:"first_strike;deathtouch;recruit_cavalry_on_kill"},
   wanyan_huonü:{name:"完颜活女",type:"unit",faction:"jin",cost:3,atk:4,def:3,text:"娄室子：敏捷；攻宋将+1", power:"haste;counter_song"},
-  wanyan_balisu:{name:"完颜拔离速",type:"unit",faction:"jin",cost:3,atk:3,def:4,text:"袭二帝：铁壁", power:"ward"},
+  wanyan_balisu:{name:"完颜拔离速",type:"unit",faction:"jin",cost:3,atk:3,def:4,text:"袭二帝：铁壁；登场时对手弃1牌", power:"ward;opp_discard_etb"},
   yelu_yudu: {name:"耶律余睹",type:"unit",faction:"jin",cost:3,atk:3,def:3,text:"辽降将：在场时金将+0/+1", power:"lord_jin_minor"},
-  xuwen:    {name:"徐文", type:"unit", faction:"jin", cost:2, atk:3, def:2, text:"宋降将：敏捷", power:"haste"},
-  wangshichong:{name:"王世崇",type:"unit",faction:"jin",cost:2,atk:2,def:3,text:"宋降将：铁壁", power:"ward"},
+  xuwen:    {name:"徐文", type:"unit", faction:"jin", cost:2, atk:3, def:2, text:"宋降将：敏捷；水战在场时金将+1攻", power:"haste;jin_attack_buff"},
+  wangshichong:{name:"王世崇",type:"unit",faction:"jin",cost:2,atk:2,def:3,text:"宋降将：铁壁；守城在场时金将+0/+2", power:"ward;jin_defense_buff"},
   wanyan_mouyan:{name:"完颜谋衍",type:"unit",faction:"jin",cost:2,atk:2,def:2,text:"娄室次子", power:null},
   gaojingshan:{name:"高景山",type:"unit",faction:"jin",cost:2,atk:2,def:2,text:"渤海使", power:null},
   liulin:    {name:"刘麟", type:"unit", faction:"jin", cost:2, atk:2, def:2, text:"刘豫子", power:null},
@@ -1036,6 +1036,9 @@ function recomputeBoard(){
     if(p.board.some(c=>c.id==='liang_taihou'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='xixia')c.buffDef++;});
     if(p.board.some(c=>c.id==='gaoshengtai'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='dali')c.buffAtk++;});
     if(p.board.some(c=>c.id==='duansiping'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='dali'){c.buffAtk++;c.buffDef++;}});
+    if(p.board.some(c=>c.id==='xuwen'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffAtk++;});
+    if(p.board.some(c=>c.id==='wangshichong'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffDef+=2;});
+    if(p.board.some(c=>c.id==='yelu_yudu'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffDef++;});
     // 李世辅 vs 金将
     p.board.forEach(c=>{if(c.id==='lishifu'&&p.board.some(x=>CARD_DB[x.id].faction==='jin'))c.buffAtk+=2;});
     // 相生：同场盟友阵营+0/+1
