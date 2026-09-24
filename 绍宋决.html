@@ -945,6 +945,8 @@ const CARD_DB = {
   tianlongsi:{name:"天龙寺", type:"land", faction:"dali", text:"佛都：产1粮；横置时回1血"},
   cining:    {name:"慈宁宫", type:"land", faction:"pink", text:"太后居所：产1粮"},
   huanyiyuan:{name:"浣衣院", type:"land", faction:"pink", text:"北狩屈辱地：产1粮；横置时对手1将-1/-1"},
+  deshou:    {name:"德寿宫", type:"land", faction:"neutral", text:"双色：可产宋粮或粉粮", dual:['song','pink']},
+  linanyujie:{name:"临安御街", type:"land", faction:"neutral", text:"找地：进场时从牌库找1张宋地或粉地入手牌", power:'fetch_song_pink'},
   /* 新增后宫粉人物 */
   zhenghuanghou:{name:"郑皇后",type:"unit",faction:"pink",cost:2,atk:0,def:3,text:"中宫：登场令对手弃1牌", power:"opp_discard_etb"},
   qiaoguifei:{name:"乔贵妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"温裕：横置令对手1将-1/-1", power:"weaken_on_tap"},
@@ -1007,8 +1009,16 @@ function buildDeck(faction){
   const nonLands=pool.filter(id=>CARD_DB[id].type!=='land');
   const landCount=22+Math.floor(Math.random()*3);
   const deck=[];
-  // 地牌随机
-  for(let i=0;i<landCount;i++) deck.push(lands[Math.floor(Math.random()*lands.length)]);
+  // 双色预组：确保有双色地和找地地
+  if(faction==='song_pink'){
+    // 6张双色/找地地，其余随机单色地
+    const specialLands=['deshou','deshou','deshou','deshou','linanyujie','linanyujie'];
+    specialLands.forEach(id=>deck.push(id));
+    const remaining=landCount-specialLands.length;
+    for(let i=0;i<remaining;i++) deck.push(lands[Math.floor(Math.random()*lands.length)]);
+  }else{
+    for(let i=0;i<landCount;i++) deck.push(lands[Math.floor(Math.random()*lands.length)]);
+  }
   // 按mana曲线分配：低费多、高费少（万智牌标准曲线）
   const costBrackets=[
     {max:1,count:8},   // 0-1费
