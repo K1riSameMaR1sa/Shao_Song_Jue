@@ -872,11 +872,17 @@ const CARD_DB = {
   taiyuan:   {name:"太原府", type:"land", faction:"jin", text:"河东根本：产1粮"},
   hejian:    {name:"河间府", type:"land", faction:"jin", text:"河北重镇：产1粮"},
   yanjing:   {name:"燕京", type:"land", faction:"jin", text:"析津：产1粮"},
+  huining:    {name:"会宁府", type:"land", faction:"jin", text:"金上京：产1粮；召唤金将时不横置"},
+  huanglong:  {name:"黄龙府", type:"land", faction:"jin", text:"燕云要冲：产1粮"},
   caochang:  {name:"草场", type:"land", faction:"xixia", text:"贺兰草场：产1粮，召唤夏将时不横置"},
   muchang:   {name:"牧场", type:"land", faction:"xixia", text:"河西牧场：产1粮，横置时夏将+1/+0"},
   yanchi:    {name:"盐州", type:"land", faction:"xixia", text:"盐湖：产2粮，回合开始-1血"},
   lianzhou:  {name:"善阐城", type:"land", faction:"dali", text:"大理都城：产1粮；若你控制理将，产2粮"},
   tengyue:   {name:"腾越府", type:"land", faction:"dali", text:"西南边隘：产1粮；横置时造1伤给目标将（毒箭）"},
+  daliwang:{name:"大理城", type:"land", faction:"dali", text:"阳苴咩城：产1粮"},
+  tianlongsi:{name:"天龙寺", type:"land", faction:"dali", text:"佛都：产1粮；横置时回1血"},
+  cining:    {name:"慈宁宫", type:"land", faction:"pink", text:"太后居所：产1粮"},
+  huanyiyuan:{name:"浣衣院", type:"land", faction:"pink", text:"北狩屈辱地：产1粮；横置时对手1将-1/-1"},
   /* 双色地 */
   huadong:   {name:"华东口岸", type:"land", faction:"neutral", text:"双色：可产宋粮或中立粮", dual:['song','neutral']},
   hebei_qian:{name:"河北三镇", type:"land", faction:"neutral", text:"双色：可产宋粮或金粮", dual:['song','jin']},
@@ -908,23 +914,47 @@ const BONDS = [
 
 /* 从阵营卡池随机抽60张，其中22-24张地 */
 function buildDeck(faction){
-  // 收集该阵营可用的牌
   const pool=Object.entries(CARD_DB).filter(([id,c])=>{
     if(c.isToken) return false;
-    if(c.faction==='neutral'||c.faction==='pink') return true; // 中立和后宫所有阵营可用
+    if(c.faction==='neutral'||c.faction==='pink') return true;
     return c.faction===faction;
   }).map(([id])=>id);
   const lands=pool.filter(id=>CARD_DB[id].type==='land');
   const nonLands=pool.filter(id=>CARD_DB[id].type!=='land');
-  const landCount=22+Math.floor(Math.random()*3); // 22-24
+  const landCount=22+Math.floor(Math.random()*3);
   const deck=[];
   // 地牌随机
   for(let i=0;i<landCount;i++) deck.push(lands[Math.floor(Math.random()*lands.length)]);
-  // 非地牌（每牌最多4张）
+  // 按mana曲线分配：低费多、高费少（万智牌标准曲线）
+  const costBrackets=[
+    {max:1,count:8},   // 0-1费
+    {max:2,count:10},  // 2费
+    {max:3,count:8},  // 3费
+    {max:5,count:8},   // 4-5费
+    {max:99,count:4}   // 6+费
+  ];
+  const used={};
+  costBrackets.forEach(b=>{
+    const candidates=nonLands.filter(id=>{
+      const c=CARD_DB[id];
+      const cost=c.cost||0;
+      const prevMax=b===costBrackets[0]?-1:costBrackets[costBrackets.indexOf(b)-1].max;
+      return cost<=b.max&&cost>prevMax&&(used[id]||0)<4;
+    });
+    for(let i=0;i<b.count&&deck.length<60;i++){
+      if(candidates.length===0)break;
+      const id=candidates[Math.floor(Math.random()*candidates.length)];
+      if((used[id]||0)>=4)continue;
+      deck.push(id);
+      used[id]=(used[id]||0)+1;
+    }
+  });
+  // 补足到60张
   while(deck.length<60){
     const id=nonLands[Math.floor(Math.random()*nonLands.length)];
-    if(deck.filter(x=>x===id).length>=4) continue;
+    if((used[id]||0)>=4)continue;
     deck.push(id);
+    used[id]=(used[id]||0)+1;
   }
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
   return deck;
