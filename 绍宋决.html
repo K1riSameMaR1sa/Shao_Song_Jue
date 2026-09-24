@@ -746,7 +746,7 @@ const CARD_DB = {
   wuyong:  {name:"吴用", type:"unit", faction:"neutral", cost:2, atk:0, def:4, text:"智多星：登场看对手手牌", power:"peek_etb"},
   linchong:{name:"林冲", type:"unit", faction:"neutral", cost:4, atk:6, def:5, text:"豹子头：先发；穿喉；铁壁；回光（阵亡时对所有敌将造6伤）", power:"first_strike;ward;deathtouch;huiguang"},
   lushisen:{name:"鲁智深",type:"unit",faction:"neutral",cost:4,atk:5,def:6,text:"花和尚：铁壁；穿喉", power:"ward;deathtouch"},
-  wusong:  {name:"武松", type:"unit", faction:"neutral", cost:3, atk:5, def:4, text:"行者：敏捷；先发；单臂擒贼（首次受伤时，若被武将攻击则斩杀攻击方；若被法术伤害则斩杀任意1敌将）", power:"haste;first_strike;qinzei"},
+  wusong:  {name:"武松", type:"unit", faction:"neutral", cost:4, atk:5, def:4, text:"行者：敏捷；先发；单臂擒贼（首次受伤时，若被武将攻击则斩杀攻击方；若被法术伤害则斩杀任意1敌将）", power:"haste;first_strike;qinzei"},
   yangzhi: {name:"杨志", type:"unit", faction:"neutral", cost:3, atk:3, def:3, text:"青面兽：铁壁", power:"ward"},
   likui:   {name:"李逵", type:"unit", faction:"neutral", cost:3, atk:6, def:3, text:"黑旋风：敏捷；攻宋将+1", power:"haste;counter_song"},
   huarong: {name:"花荣", type:"unit", faction:"neutral", cost:3, atk:3, def:2, text:"小李广：穿喉；敏捷", power:"deathtouch;haste"},
@@ -872,6 +872,8 @@ const CARD_DB = {
   hetao:     {name:"河套", type:"land", faction:"neutral", text:"双色：可产金粮或夏粮", dual:['jin','xixia']},
   yunnan:    {name:"云南边市", type:"land", faction:"neutral", text:"双色：可产夏粮或理粮", dual:['xixia','dali']},
   lingnan:   {name:"岭南商路", type:"land", faction:"neutral", text:"双色：可产宋粮或理粮", dual:['song','dali']},
+  liangshanpo:{name:"梁山泊", type:"land", faction:"neutral", text:"八百里水泊：产1粮；召唤水浒将时，此地产费视为2费"},
+  jiyitang:  {name:"聚义堂", type:"land", faction:"neutral", text:"替天行道：产1粮；召唤水浒将时，此地产费视为2费"},
   goryeo:    {name:"高丽口岸", type:"land", faction:"neutral", text:"双色：可产金粮或中立粮", dual:['jin','neutral']},
   /* 异国无色地（找地地） */
   luoma:     {name:"罗马城", type:"land", faction:"neutral", text:"无色：登场时找一张地牌入战场", fetch:true},
