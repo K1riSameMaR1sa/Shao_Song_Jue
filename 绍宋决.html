@@ -739,6 +739,19 @@ const CARD_DB = {
   token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_slave:{name:"奴隶",type:"unit",faction:"jin",cost:0,atk:1,def:1,text:"劳作", power:null, isToken:true},
   token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"在场时金将+1/+0；被消灭时宋主-2威望（靖康之耻）", power:"nü_buff_jin", isToken:true},
+  /* 梁山一百零八将 */
+  songjiang: {name:"宋江", type:"unit", faction:"neutral", cost:4, atk:2, def:4, text:"及时雨：登场抽1；在场时中立将+0/+1", power:"songjiang_etb"},
+  lujunyi: {name:"卢俊义", type:"unit", faction:"neutral", cost:5, atk:6, def:5, text:"玉麒麟：先发；穿喉", power:"first_strike;deathtouch"},
+  wuyong:  {name:"吴用", type:"unit", faction:"neutral", cost:2, atk:0, def:3, text:"智多星：登场看对手手牌", power:"peek_etb"},
+  linchong:{name:"林冲", type:"unit", faction:"neutral", cost:4, atk:5, def:4, text:"豹子头：先发；铁壁", power:"first_strike;ward"},
+  lushisen:{name:"鲁智深",type:"unit",faction:"neutral",cost:4,atk:5,def:5,text:"花和尚：铁壁；穿喉", power:"ward;deathtouch"},
+  wusong:  {name:"武松", type:"unit", faction:"neutral", cost:3, atk:4, def:3, text:"行者：敏捷；先发", power:"haste;first_strike"},
+  yangzhi: {name:"杨志", type:"unit", faction:"neutral", cost:3, atk:3, def:3, text:"青面兽：铁壁", power:"ward"},
+  likui:   {name:"李逵", type:"unit", faction:"neutral", cost:3, atk:5, def:2, text:"黑旋风：敏捷；攻宋将+1", power:"haste;counter_song"},
+  huarong: {name:"花荣", type:"unit", faction:"neutral", cost:3, atk:3, def:2, text:"小李广：穿喉；敏捷", power:"deathtouch;haste"},
+  daizong: {name:"戴宗", type:"unit", faction:"neutral", cost:2, atk:1, def:2, text:"神行太保：敏捷；登场抽1", power:"haste;draw1_etb"},
+  /* 百华阵 */
+  baihuazhen:{name:"百华阵",type:"instant",faction:"neutral",cost:3,text:"瞬间：容貌女子披坚执锐，奇袭活捉对手1将归你控制", power:"capture_one"},
 
   /* ===== 州府/地 ===== */
   kaiifeng:  {name:"开封府", type:"land", faction:"song", text:"大宋都城：产1粮"},
@@ -1220,7 +1233,7 @@ function onHandCardClick(idx){
   }
   playCard(idx);
 }
-function needsTarget(p){return ['kill_small','kill_tiny','kill_any_draw1','deal3_to_unit','deal2_to_unit','weaken_1_1','weaken_2_2','deal1_deathtouch','deal4_to_unit_damage1','bounce_one_enemy'].includes(p);}
+function needsTarget(p){return ['kill_small','kill_tiny','kill_any_draw1','deal3_to_unit','deal2_to_unit','weaken_1_1','weaken_2_2','deal1_deathtouch','deal4_to_unit_damage1','bounce_one_enemy','capture_one'].includes(p);}
 function playCard(handIdx,targetIdx){
   const cid=G.my.hand[handIdx].id;const db=CARD_DB[cid];
   G.my.mana-=db.cost;
@@ -1344,6 +1357,14 @@ function resolveSpell(power,ti){
       opp.board.push({id:'token_lu',tapped:false,sick:true});
       logMsg('海上之盟：双方各抽2，宋生民夫，金生俘虏。');
       break;
+    case 'capture_one':{
+      if(ti===undefined)break;
+      const t=opp.board[ti];
+      opp.board.splice(ti,1);
+      me.board.push({id:t.id,tapped:false,sick:false});
+      logMsg(`百华阵：活捉 ${CARD_DB[t.id].name}，归为己用！`);
+      break;
+    }
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
     case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
