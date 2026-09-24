@@ -924,6 +924,25 @@ const CARD_DB = {
   tianlongsi:{name:"天龙寺", type:"land", faction:"dali", text:"佛都：产1粮；横置时回1血"},
   cining:    {name:"慈宁宫", type:"land", faction:"pink", text:"太后居所：产1粮"},
   huanyiyuan:{name:"浣衣院", type:"land", faction:"pink", text:"北狩屈辱地：产1粮；横置时对手1将-1/-1"},
+  /* 新增后宫粉人物 */
+  zhenghuanghou:{name:"郑皇后",type:"unit",faction:"pink",cost:2,atk:0,def:3,text:"中宫：登场令对手弃1牌", power:"opp_discard_etb"},
+  qiaoguifei:{name:"乔贵妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"温裕：横置令对手1将-1/-1", power:"weaken_on_tap"},
+  liuguifei:{name:"刘贵妃",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"奉圣：登场抽1", power:"draw1_etb"},
+  lishishi:{name:"李师师",type:"unit",faction:"pink",cost:2,atk:1,def:2,text:"青楼名妓：横置康对手1法术", power:"counter_on_tap"},
+  wuhuanghou:{name:"吴皇后",type:"unit",faction:"pink",cost:2,atk:0,def:3,text:"宪圣慈烈：宋将+0/+1", power:"lord_tough_minor"},
+  liuguifei:{name:"刘贵妃",type:"unit",faction:"pink",cost:2,atk:1,def:2,text:"贤妃：登场令对手弃1牌", power:"opp_discard_etb"},
+  zhangjieyu:{name:"张婕妤",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"婕妤：横置回1血", power:"heal_on_tap"},
+  zhuguifei:{name:"朱贵妃",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"淑妃：登场生1女奴", power:"token_nü_etb"},
+  fengguan: {name:"凤冠霞帔",type:"item",faction:"pink",cost:1,text:"名品：装备给1将，+0/+2", power:"equip_0_2"},
+  liugong:{name:"六宫粉黛",type:"sorcery",faction:"pink",cost:3,text:"名品：所有宋将+0/+1直到回合结束", power:"song_all_tough"},
+  hongyan: {name:"红颜祸水",type:"instant",faction:"pink",cost:2,text:"瞬间：目标敌将-2/-2", power:"weaken_2_2"},
+  liangxiaohong:{name:"梁小红",type:"unit",faction:"pink",cost:1,atk:1,def:1,text:"临安歌女：敏捷", power:"haste"},
+  /* 新增后宫名品 */
+  fengguan:  {name:"凤冠霞帔",type:"item",faction:"pink",cost:2,text:"名品：装备给1将+0/+3并获得铁壁", power:"equip_ward_3"},
+  jiaofang:  {name:"椒房之宠",type:"sorcery",faction:"pink",cost:3,text:"名品：所有粉将+1/+1", power:"jiaofang_etb"},
+  yizhao:    {name:"遗诏",type:"sorcery",faction:"pink",cost:2,text:"名品：抽2牌", power:"draw2_etb"},
+  /* 蓝粉双色地 */
+  roufu:     {name:"柔福帝姬府",type:"land",faction:"neutral",text:"双色：可产中立粮或粉粮", dual:['neutral','pink']},
   /* 双色地 */
   huadong:   {name:"华东口岸", type:"land", faction:"neutral", text:"双色：可产宋粮或中立粮", dual:['song','neutral']},
   hebei_qian:{name:"河北三镇", type:"land", faction:"neutral", text:"双色：可产宋粮或金粮", dual:['song','jin']},
@@ -955,10 +974,13 @@ const BONDS = [
 
 /* 从阵营卡池随机抽60张，其中22-24张地 */
 function buildDeck(faction){
+  // 支持双色预组，如 'song_pink'
+  const factions = faction.split('_');
   const pool=Object.entries(CARD_DB).filter(([id,c])=>{
     if(c.isToken) return false;
-    if(c.faction==='neutral'||c.faction==='pink') return true;
-    return c.faction===faction;
+    if(c.faction==='neutral') return true;
+    if(factions.includes(c.faction)) return true;
+    return false;
   }).map(([id])=>id);
   const lands=pool.filter(id=>CARD_DB[id].type==='land');
   const nonLands=pool.filter(id=>CARD_DB[id].type!=='land');
@@ -1630,13 +1652,21 @@ function resolveSpell(power,ti){
       logMsg('连环马冲锋！中立将+2/+0并敏捷。');break;
     }
     case 'goulianqiang_etb':{
-      // 康攻击宣告：本回合对手不能宣告攻击
       G.enemy.cantAttack=true;
       logMsg('钩镰枪破阵！对手本回合不能宣告攻击。');
-      // 若对手场上有金将，造3伤
       const jinTarget=opp.board.find(c=>CARD_DB[c.id].faction==='jin');
       if(jinTarget){jinTarget.damageTaken=(jinTarget.damageTaken||0)+3;logMsg(`钩镰枪专破铁浮屠，对${CARD_DB[jinTarget.id].name}造3伤！`);}
       break;
+    }
+    case 'jiaofang_etb':{
+      p.board.forEach(c=>{if(CARD_DB[c.id].faction==='pink'){c.buffAtk=(c.buffAtk||0)+1;c.buffDef=(c.buffDef||0)+1;}});
+      logMsg('椒房之宠！所有粉将+1/+1。');break;
+    }
+    case 'draw2_etb':{drawTo(p,2);logMsg('遗诏：抽2牌。');break;}
+    case 'equip_ward_3':{
+      const t=p.board[0];
+      if(t){t.buffDef=(t.buffDef||0)+3;t.givenWard=true;logMsg(`凤冠霞帔披于${CARD_DB[t.id].name}，+0/+3铁壁。`);}
+      else logMsg('无将可装备。');break;
     }
     case 'equip_2_2':{
       const t=me.board.find(c=>CARD_DB[c.id].faction==='jin');
@@ -2143,6 +2173,8 @@ function aiResolveSpell(db){
     case 'damage_player5_heal2':opp.life-=5;me.life+=2;break;
     case 'deal2_all_enemy':opp.board.forEach(t=>t.damageTaken=(t.damageTaken||0)+2);break;
     case 'weaken_2_2':{const t=opp.board[0];if(t)t.weaken=(t.weaken||0)-2;break;}
+    case 'equip_0_2':{const t=me.board[0];if(t){t.buffDef=(t.buffDef||0)+2;logMsg('凤冠霞帔，+0/+2。');}break;}
+    case 'song_all_tough':{me.board.forEach(c=>{if(CARD_DB[c.id].faction==='song')c.buffDef=(c.buffDef||0)+1;});logMsg('六宫粉黛，宋将+0/+1！');break;}
     case 'deal1_deathtouch':{const t=opp.board[0];if(t)t.damageTaken=99;break;}
     case 'deal4_to_unit_damage1':{const t=opp.board[0];if(t){t.damageTaken=(t.damageTaken||0)+4;opp.life-=1;}break;}
     case 'deal3_to_unit':case 'deal2_to_unit':{const t=opp.board[0];if(t)t.damageTaken=(t.damageTaken||0)+(db.power==='deal3_to_unit'?3:2);break;}
@@ -2217,10 +2249,12 @@ function buildFactionGrid(){
     dali:'紫 · 蛊毒削弱，巫蛊debuff，控制流',
     neutral:'蓝 · 梁山聚义，搭档检索，连环爆发',
     pink:'粉 · 后宫斡旋，返照牵制，辅助全场',
+    neutral_pink:'蓝粉 · 梁山+后宫，辅助控场爆发',
+    song_pink:'红粉 · 宋后宫双色，士气+牵制控制',
   };
   grid.innerHTML=Object.entries(FACTIONS).filter(([k])=>['song','jin','xixia','dali','neutral','pink'].includes(k)).map(([k,f])=>{
     return `<div class="faction-card f-${k}" onclick="pickFaction('${k}')"><h3>${f.name}</h3><p>${descs[k]||''}</p></div>`;
-  }).join('');
+  }).join('')+`<div class="faction-card" onclick="pickFaction('neutral_pink')" style="background:linear-gradient(135deg,#2980b9,#e91e63)"><h3>蓝粉双色</h3><p>梁山+后宫，辅助控场爆发</p></div>`+`<div class="faction-card" onclick="pickFaction('song_pink')" style="background:linear-gradient(135deg,#c0392b,#c97b8a)"><h3>红粉双色</h3><p>宋后宫：士气+牵制</p></div>`;
 }
 let pendingFactionChoice='ai';
 function showFactionSelect(){pendingFactionChoice='ai';buildFactionGrid();showScreen('faction-screen');}
