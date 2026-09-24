@@ -2310,31 +2310,31 @@ function renderDeckPreview(){
   // 左右切换
   html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">`;
   html+=`<button class="menu-btn ghost" style="padding:8px 16px" onclick="deckPreviewIdx=${deckPreviewIdx===0?factions.length-1:deckPreviewIdx-1};renderDeckPreview()">◀ 上一套</button>`;
-  html+=`<span style="font-size:13px;color:#aaa">${deckPreviewIdx+1} / ${factions.length}</span>`;
+  html+=`<span style="font-size:13px;color:#666">${deckPreviewIdx+1} / ${factions.length}</span>`;
   html+=`<button class="menu-btn ghost" style="padding:8px 16px" onclick="deckPreviewIdx=${deckPreviewIdx===factions.length-1?0:deckPreviewIdx+1};renderDeckPreview()">下一套 ▶</button>`;
   html+=`</div>`;
   // 套牌卡片
   html+=`<div style="background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden">`;
   html+=`<div style="padding:16px;background:linear-gradient(135deg,${colors[f]}33,transparent);border-bottom:1px solid ${colors[f]}44">`;
   html+=`<h3 style="color:${colors[f]};margin:0 0 4px 0;font-size:18px">${names[f]}</h3>`;
-  html+=`<p style="margin:0;font-size:12px;color:#aaa">主牌60张（地${landCount}/将${unitCount}/法术${itemCount}/瞬间${instantCount}） · 备牌15张</p>`;
+  html+=`<p style="margin:0;font-size:12px;color:#666">主牌60张（地${landCount}/将${unitCount}/法术${itemCount}/瞬间${instantCount}） · 备牌15张</p>`;
   html+=`</div>`;
   html+=`<div style="padding:16px;display:flex;gap:16px;align-items:flex-end">`;
   html+=`<div style="flex:1;display:flex;align-items:flex-end;gap:4px;height:120px;padding:0 8px">`;
   costs.forEach((count,i)=>{
     const h=count>0?Math.max(count/maxCost*100,8):2;
     html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">`;
-    html+=`<div style="font-size:11px;color:#fff;margin-bottom:2px">${count||''}</div>`;
+    html+=`<div style="font-size:11px;color:#333;margin-bottom:2px;font-weight:bold">${count||''}</div>`;
     html+=`<div style="width:100%;background:${colors[f]};border-radius:3px 3px 0 0;height:${h}%;min-height:2px"></div>`;
-    html+=`<div style="font-size:10px;color:#aaa;margin-top:2px">${i===7?'7+':i}</div>`;
+    html+=`<div style="font-size:10px;color:#888;margin-top:2px">${i===7?'7+':i}</div>`;
     html+=`</div>`;
   });
   html+=`</div>`;
-  html+=`<div style="width:100px;font-size:12px;line-height:2">`;
+  html+=`<div style="width:100px;font-size:12px;line-height:2;color:#333">`;
   html+=`<div>地 ${landCount}</div><div>将 ${unitCount}</div><div>名品 ${itemCount}</div><div>瞬间 ${instantCount}</div>`;
   html+=`</div></div>`;
   html+=`<div style="padding:0 16px 16px">`;
-  html+=`<h4 style="margin:8px 0;font-size:14px;color:#fff">主牌（60）</h4>`;
+  html+=`<h4 style="margin:8px 0;font-size:14px;color:#333;font-weight:bold">主牌（60）</h4>`;
   const grouped={};
   cards.forEach(x=>{const cost=x.c.cost||0;if(!grouped[cost])grouped[cost]=[];grouped[cost].push(x);});
   Object.keys(grouped).sort((a,b)=>a-b).forEach(cost=>{
@@ -2345,11 +2345,11 @@ function renderDeckPreview(){
     });
     html+=`</div>`;
   });
-  html+=`<h4 style="margin:12px 0 4px;font-size:14px;color:#888">备牌（15）</h4>`;
+  html+=`<h4 style="margin:12px 0 4px;font-size:14px;color:#666;font-weight:bold">备牌（15）</h4>`;
   html+=`<div style="font-size:12px">`;
   sideboard.forEach(id=>{
     const c=CARD_DB[id];
-    html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 8px;background:rgba(0,0,0,0.3);border:1px dashed #666;border-radius:4px;font-size:11px;color:#999">${c.name}</span>`;
+    html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 8px;background:rgba(0,0,0,0.15);border:1px dashed #999;border-radius:4px;font-size:11px;color:#444">${c.name}</span>`;
   });
   html+=`</div></div></div>`;
   document.getElementById('deck-preview-content').innerHTML=html;
