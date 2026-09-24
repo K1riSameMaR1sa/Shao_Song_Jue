@@ -2168,12 +2168,21 @@ function showDeckPreview(){
   const names={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立梁山（蓝）',pink:'后宫（粉）'};
   let html='';
   factions.forEach(f=>{
-    const cards=Object.entries(CARD_DB).filter(([id,c])=>c.faction===f&&!c.isToken);
-    html+=`<div style="margin-bottom:16px;padding:12px;border-left:4px solid ${colors[f]};background:rgba(255,255,255,0.05)">`;
-    html+=`<h3 style="color:${colors[f]};margin:0 0 8px 0">${names[f]}（${cards.length}张）</h3>`;
+    const deck=buildDeck(f);
+    const cards=deck.map(id=>CARD_DB[id]);
+    const landCount=cards.filter(c=>c.type==='land').length;
+    const costs={};
+    cards.forEach(c=>{const cost=c.cost||0;costs[cost]=(costs[cost]||0)+1;});
+    html+=`<div style="margin-bottom:20px;padding:12px;border-left:4px solid ${colors[f]};background:rgba(255,255,255,0.05)">`;
+    html+=`<h3 style="color:${colors[f]};margin:0 0 4px 0">${names[f]}</h3>`;
+    html+=`<p style="margin:0 0 8px 0;font-size:12px;color:#aaa">60张 · 地${landCount}张 · 费用分布：`;
+    Object.keys(costs).sort((a,b)=>a-b).forEach(k=>{html+=`${k}费×${costs[k]} `;});
+    html+='</p>';
     html+='<div style="font-size:13px;line-height:1.8">';
-    cards.forEach(([id,c])=>{
-      html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 6px;padding:4px 8px;background:rgba(0,0,0,0.3);border-radius:3px">${c.name}（${c.cost||0}费 ${c.type==='unit'?c.atk+'/'+c.def:c.type==='land'?'地':c.type==='instant'?'瞬':c.type==='item'?'名':''}）</span>`;
+    // 按费用排序
+    const sorted=cards.map((c,i)=>({c,id:deck[i]})).sort((a,b)=>(a.c.cost||0)-(b.c.cost||0));
+    sorted.forEach(({c,id})=>{
+      html+=`<span onclick="showCardDetail('${id}')" style="cursor:pointer;display:inline-block;margin:2px 4px;padding:3px 6px;background:rgba(0,0,0,0.3);border-radius:3px;font-size:12px">${c.name}${c.type==='unit'?`(${c.atk}/${c.def})`:''}</span>`;
     });
     html+='</div></div>';
   });
