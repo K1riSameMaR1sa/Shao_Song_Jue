@@ -674,7 +674,7 @@ const CARD_DB = {
   /* ===== 徽钦二帝与北狩宗室（历史包袱牌） ===== */
   zhaoji:    {name:"宋徽宗赵佶",type:"unit",faction:"song",cost:3,atk:0,def:3,text:"道君：在场时每回合-1粮（北狩之辱）", power:"tax_drain"},
   zhaohuan:  {name:"宋钦宗赵桓",type:"unit",faction:"song",cost:2,atk:0,def:2,text:"懦弱：不能攻击", power:"cant_attack"},
-  weixianfei:{name:"韦贤妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"显仁太后：横置产1粮；登场生1女奴", power:"mana_dork;token_nü_etb"},
+  weixianfei:{name:"韦贤妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"显仁太后：横置产1粮；登场生1女奴（北狩）", power:"mana_dork;token_nü_etb"},
   xingbingyi:{name:"邢秉懿",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"嘉国夫人：宋将+0/+1", power:"lord_tough_minor"},
   jiangzuifei:{name:"姜醉媚",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"返照：横置将对手1将弹回手牌", power:"bounce_on_tap"},
   tianchunluo:{name:"田春罗",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"命令：登场令对手弃1牌", power:"opp_discard_etb"},
@@ -738,7 +738,7 @@ const CARD_DB = {
   token_minfu:{name:"民夫",type:"unit",faction:"song",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_slave:{name:"奴隶",type:"unit",faction:"jin",cost:0,atk:1,def:1,text:"劳作", power:null, isToken:true},
-  token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"横置时对手-1威望", power:"nü_on_tap", isToken:true},
+  token_nü:  {name:"女奴",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"在场时金将+1/+0；被消灭时金主-2威望", power:"nü_buff_jin", isToken:true},
 
   /* ===== 州府/地 ===== */
   kaiifeng:  {name:"开封府", type:"land", faction:"song", text:"大宋都城：产1粮"},
@@ -1045,6 +1045,10 @@ function recomputeBoard(){
     if(p.board.some(c=>c.id==='xuwen'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffAtk++;});
     if(p.board.some(c=>c.id==='wangshichong'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffDef+=2;});
     if(p.board.some(c=>c.id==='yelu_yudu'))p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffDef++;});
+    /* 女奴：在场时金将+1攻 */
+    p.board.filter(c=>c.id==='token_nü').forEach(()=>{
+      p.board.forEach(c=>{if(CARD_DB[c.id].faction==='jin')c.buffAtk++;});
+    });
     // 李世辅 vs 金将
     p.board.forEach(c=>{if(c.id==='lishifu'&&p.board.some(x=>CARD_DB[x.id].faction==='jin'))c.buffAtk+=2;});
     // 相生：同场盟友阵营+0/+1
@@ -1511,6 +1515,7 @@ function cleanupDead(){
         if(pw==='death_damage2'){opp.life-=2;logMsg(`${CARD_DB[c.id].name} 殉国，对手-2威望！`);}
         if(pw==='death_damage1'){opp.life-=1;logMsg(`${CARD_DB[c.id].name} 殉节，对手-1威望！`);}
         if(pw==='death_draw1'){drawTo(p,1);logMsg(`${CARD_DB[c.id].name} 死后留书，抽1。`);}
+        if(c.id==='token_nü'){p.life-=2;logMsg(`女奴惨死，金主-2威望（民怨）。`);}
       }
       else alive.push(c);
     });
