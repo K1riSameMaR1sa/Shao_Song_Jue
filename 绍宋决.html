@@ -1111,12 +1111,23 @@ function bindClicks(p,prefix){
     document.querySelector('.player-bar.enemy').style.cursor='pointer';
     document.querySelector('.player-bar.enemy').onclick=()=>{if(G.phase==='declare_attack')setAttackTarget(null);};
   }
-  // 悬停卡牌详情
+  // 悬停卡牌详情；手机端长摁
   document.querySelectorAll('.card').forEach(el=>{
     const id=el.dataset.id;
     if(!id||!CARD_DB[id])return;
-    el.onmouseenter=()=>showTooltip(el);
+    el.onmouseenter=()=>{if(!('ontouchstart' in window))showTooltip(el);};
     el.onmouseleave=hideTooltip;
+    let pressTimer=null;
+    let longPress=false;
+    el.addEventListener('touchstart',()=>{
+      longPress=false;
+      pressTimer=setTimeout(()=>{longPress=true;showTooltip(el);navigator.vibrate&&navigator.vibrate(30);},500);
+    },{passive:true});
+    el.addEventListener('touchend',(e)=>{
+      clearTimeout(pressTimer);
+      if(longPress){e.preventDefault();hideTooltip();}
+    },{passive:false});
+    el.addEventListener('touchmove',()=>{clearTimeout(pressTimer);longPress=false;},{passive:true});
   });
 }
 
@@ -1901,10 +1912,14 @@ function renderCodex(){
       ${stats?`<div style="position:absolute;bottom:-4px;right:-4px;background:var(--tie);padding:1px 6px;font-size:12px;font-weight:700;border-radius:2px">${stats}</div>`:''}
     </div>`;
   }).join('');
-  // 图鉴悬停
+  // 图鉴悬停/长摁
   grid.querySelectorAll('.card').forEach(el=>{
-    el.onmouseenter=()=>showTooltip(el);
+    el.onmouseenter=()=>{if(!('ontouchstart' in window))showTooltip(el);};
     el.onmouseleave=hideTooltip;
+    let pressTimer=null;
+    el.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>{showTooltip(el);navigator.vibrate&&navigator.vibrate(30);},500);},{passive:true});
+    el.addEventListener('touchend',()=>{clearTimeout(pressTimer);hideTooltip();});
+    el.addEventListener('touchmove',()=>clearTimeout(pressTimer),{passive:true});
   });
 }
 
