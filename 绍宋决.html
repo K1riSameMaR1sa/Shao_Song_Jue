@@ -550,7 +550,7 @@ const CARD_DB = {
   mengzi:    {name:"孟子", type:"sorcery", faction:"song", cost:2, text:"名品：宋将+2/+0（浩然之气）", power:"song_buff_2_0"},
   liji:      {name:"礼记", type:"sorcery", faction:"song", cost:2, text:"名品：所有将获得铁壁（克己复礼）", power:"all_ward"},
   chongxue:  {name:"崇学", type:"sorcery", faction:"song", cost:3, text:"名品：进场后可花1粮崇学判定（d20）；再花1粮辩论可重投。效果持续整局", power:"chongxue_etb"},
-  zongjiao:  {name:"崇教", type:"sorcery", faction:"neutral", cost:3, text:"名品：掷d20判定推崇佛/道，效果持续整局", power:"zongjiao_etb"},
+  zongjiao:  {name:"崇教", type:"sorcery", faction:"neutral", cost:3, text:"名品：掷d20判定推崇道/佛/民间教，效果持续整局", power:"zongjiao_etb"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1204,15 +1204,17 @@ function resolveSpell(power,ti){
     case 'zongjiao_etb':{
       const roll=Math.floor(Math.random()*20)+1;
       const religions=[];
-      if(roll<=10)religions.push('buddhism');
-      if(roll>=10&&roll<=15)religions.push('syncretic');
-      if(roll>=15)religions.push('taoism');
+      if(roll<=11)religions.push('taoism');
+      if(roll>=12&&roll<=13)religions.push('syncretic');
+      if(roll>=13&&roll<=16)religions.push('buddhism');
+      if(roll>=17)religions.push('folk');
       me.zongjiao=religions;
-      const nameMap={buddhism:'佛教',syncretic:'佛道双修',taoism:'道教'};
+      const nameMap={taoism:'道教',syncretic:'道佛双修',buddhism:'佛教',folk:'民间教（祆教/摩尼）'};
       logMsg(`「崇教」掷出 <b>${roll}</b> → 推崇「${religions.map(r=>nameMap[r]).join('+')}」！`);
-      if(religions.includes('buddhism'))logMsg('佛教：每回合维持阶段双方各回1血（慈悲为怀）。');
-      if(religions.includes('taoism'))logMsg('道教：每回合重置阶段+1粮（清静无为）。');
-      if(religions.includes('syncretic'))logMsg('佛道双修：所有将+0/+1（性命双修）。');
+      if(religions.includes('taoism'))logMsg('道教：祠部扶持，每回合重置阶段+1粮。');
+      if(religions.includes('buddhism'))logMsg('佛教：南渡后复，每回合维持阶段双方各回1血。');
+      if(religions.includes('syncretic'))logMsg('道佛双修：性命双修，所有将+0/+1。');
+      if(religions.includes('folk'))logMsg('民间教：祆摩流传，每回合抽牌阶段额外抽1。');
       break;
     }
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
@@ -1455,7 +1457,7 @@ function runPhase(ph){
       logMsg('—— 维持阶段 ——');
       break;
     case 'draw':
-      if(G.turn>1){drawTo(p,1);if(p.chongxue&&p.chongxue.includes('jingxue')){drawTo(p,1);logMsg('经学：学以致用，额外抽1。');}}
+      if(G.turn>1){drawTo(p,1);if(p.chongxue&&p.chongxue.includes('jingxue')){drawTo(p,1);logMsg('经学：学以致用，额外抽1。');}if(p.zongjiao&&p.zongjiao.includes('folk')){drawTo(p,1);logMsg('民间教：祆摩流传，额外抽1。');}}
       logMsg('—— 抽牌阶段 ——');
       break;
     case 'precombat_main':
