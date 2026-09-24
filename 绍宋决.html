@@ -361,7 +361,18 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 <div id="faction-screen" class="screen">
   <h2 style="margin-bottom:20px;letter-spacing:6px">择 尔 阵 营</h2>
   <div class="faction-grid" id="faction-grid"></div>
-  <p style="margin-top:20px;font-size:12px;color:var(--hui)" onclick="backToMenu()" class="menu-btn ghost" style="padding:8px 20px;cursor:pointer">返回</p>
+  <div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
+    <button class="menu-btn ghost" style="padding:8px 20px" onclick="showDeckPreview()">查看套牌</button>
+    <button class="menu-btn ghost" style="padding:8px 20px" onclick="backToMenu()">返回</button>
+  </div>
+</div>
+
+<div id="deck-preview-screen" class="screen">
+  <h2 style="margin-bottom:20px;letter-spacing:6px">预 组 套 牌</h2>
+  <div id="deck-preview-content" style="max-width:800px;margin:0 auto;text-align:left"></div>
+  <div style="margin-top:20px;display:flex;gap:12px;justify-content:center">
+    <button class="menu-btn ghost" style="padding:8px 20px" onclick="showFactionSelect()">返回阵营选择</button>
+  </div>
 </div>
 
 <!-- 同屏双人 -->
@@ -2121,6 +2132,24 @@ function buildFactionGrid(){
 }
 let pendingFactionChoice='ai';
 function showFactionSelect(){pendingFactionChoice='ai';buildFactionGrid();showScreen('faction-screen');}
+function showDeckPreview(){
+  const factions=['song','jin','xixia','dali','neutral','pink'];
+  const colors={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e63'};
+  const names={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立梁山（蓝）',pink:'后宫（粉）'};
+  let html='';
+  factions.forEach(f=>{
+    const cards=Object.entries(CARD_DB).filter(([id,c])=>c.faction===f&&!c.isToken);
+    html+=`<div style="margin-bottom:16px;padding:12px;border-left:4px solid ${colors[f]};background:rgba(255,255,255,0.05)">`;
+    html+=`<h3 style="color:${colors[f]};margin:0 0 8px 0">${names[f]}（${cards.length}张）</h3>`;
+    html+='<div style="font-size:13px;line-height:1.8">';
+    cards.forEach(([id,c])=>{
+      html+=`<span style="display:inline-block;margin:2px 6px;padding:2px 6px;background:rgba(0,0,0,0.3);border-radius:3px">${c.name}（${c.cost||0}费 ${c.type==='unit'?c.atk+'/'+c.def:c.type==='land'?'地':c.type==='instant'?'瞬':c.type==='item'?'名':''}）</span>`;
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('deck-preview-content').innerHTML=html;
+  showScreen('deck-preview-screen');
+}
 function showLocalFaction(){pendingFactionChoice='local';buildFactionGrid();showScreen('faction-screen');}
 let localPick=null;
 function pickFaction(f){
