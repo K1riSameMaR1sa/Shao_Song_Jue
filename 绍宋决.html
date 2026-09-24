@@ -2112,8 +2112,10 @@ function buildFactionGrid(){
     jin:'金 · 重甲破阵，装备加持，高费碾压',
     xixia:'绿 · 牧场产粮，敏捷快攻，经济制胜',
     dali:'紫 · 蛊毒削弱，巫蛊debuff，控制流',
+    neutral:'蓝 · 梁山聚义，搭档检索，连环爆发',
+    pink:'粉 · 后宫斡旋，返照牵制，辅助全场',
   };
-  grid.innerHTML=Object.entries(FACTIONS).filter(([k])=>['song','jin','xixia','dali'].includes(k)).map(([k,f])=>{
+  grid.innerHTML=Object.entries(FACTIONS).filter(([k])=>['song','jin','xixia','dali','neutral','pink'].includes(k)).map(([k,f])=>{
     return `<div class="faction-card f-${k}" onclick="pickFaction('${k}')"><h3>${f.name}</h3><p>${descs[k]||''}</p></div>`;
   }).join('');
 }
@@ -2123,7 +2125,8 @@ function showLocalFaction(){pendingFactionChoice='local';buildFactionGrid();show
 let localPick=null;
 function pickFaction(f){
   if(pendingFactionChoice==='ai'){
-    const enemy=f==='song'?'jin':(f==='jin'?'song':'jin');
+    const enemyMap={song:'jin',jin:'song',xixia:'dali',dali:'xixia',neutral:'jin',pink:'song'};
+    const enemy=enemyMap[f]||'jin';
     showScreen('game-screen');
     initGame('ai',f,enemy);
   }else{
