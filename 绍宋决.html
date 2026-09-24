@@ -527,7 +527,7 @@ const CARD_DB = {
   qinhui:    {name:"秦桧", type:"unit", faction:"qi", cost:2, atk:1, def:3, text:"与洪涯同场时产1粮", power:null},
 
   /* ===== 西夏将 ===== */
-  liyuanhao: {name:"李元昊", type:"unit", faction:"xixia", cost:5, atk:5, def:5, text:"西夏武帝：夏将+1/+1；先发", power:"lord_xixia;first_strike"},
+  liyuanhao: {name:"李元昊", type:"unit", faction:"xixia", cost:5, atk:4, def:5, text:"西夏武帝：夏将+1/+1；先发", power:"lord_xixia;first_strike"},
   yeiliyu:   {name:"野利遇乞",type:"unit",faction:"xixia",cost:3,atk:3,def:3,text:"西夏名将：攻理将+1", power:"counter_dali"},
   weiming:   {name:"嵬名郎君",type:"unit",faction:"xixia",cost:2,atk:2,def:2,text:"党项亲贵：敏捷", power:"haste"},
   miezang:   {name:"没藏太后",type:"unit",faction:"xixia",cost:3,atk:1,def:4,text:"摄政：横置产1粮", power:"mana_dork"},
@@ -563,20 +563,20 @@ const CARD_DB = {
   fengtian:  {name:"奉天讨罪",type:"instant",faction:"song",cost:3,text:"瞬间：对手-5威望，己方+2威望", power:"damage_player5_heal2"},
   /* 突袭水寨同位 */
   jieying:   {name:"劫营", type:"instant", faction:"neutral", cost:1, text:"瞬间：对一个敌将造2伤", power:"deal2_to_unit"},
-  huoshao:   {name:"火烧连营",type:"instant",faction:"jin",cost:3,text:"瞬间：对所有敌将造2伤", power:"deal2_all_enemy"},
+  huoshao:   {name:"火烧连营",type:"instant",faction:"jin",cost:2,text:"瞬间：对所有敌将造2伤", power:"deal2_all_enemy"},
   /* 巫蛊同位 */
   wudu:      {name:"五毒教", type:"instant", faction:"dali", cost:3, text:"瞬间：目标将-2/-2直到回合结束", power:"weaken_2_2"},
   /* 孔雀胆同位 */
   duzhen:    {name:"毒针", type:"instant", faction:"dali", cost:1, text:"瞬间：对一个将造1伤，穿喉", power:"deal1_deathtouch"},
   qianji:    {name:"牵机药", type:"instant", faction:"dali", cost:3, text:"瞬间：对一个将造4伤，对手-1威望", power:"deal4_to_unit_damage1"},
   /* 宋朝名人 */
-  shaoyong:  {name:"邵雍", type:"unit", faction:"song", cost:4, atk:2, def:4, text:"登场掷d20：1-10抽1，11-15回2血，16-20对手-2威望", power:"shaoyong_etb"},
+  shaoyong:  {name:"邵雍", type:"unit", faction:"song", cost:4, atk:2, def:5, text:"登场掷d20：1-10抽1，11-15回2血，16-20对手-2威望", power:"shaoyong_etb"},
   /* 西夏名人 */
   liang_taihou:{name:"梁太后",type:"unit",faction:"xixia",cost:3,atk:2,def:4,text:"摄政：夏将+0/+1；登场重置所有夏地", power:"liang_etb"},
   weiming_awu:{name:"嵬名阿吴",type:"unit",faction:"xixia",cost:3,atk:4,def:2,text:"先发；攻理将+1", power:"first_strike;counter_dali"},
   /* 大理名人 */
   gaoshengtai:{name:"高升泰",type:"unit",faction:"dali",cost:4,atk:4,def:3,text:"权臣：理将+1/+0；登场对手弃1牌", power:"gaoshengtai_etb"},
-  duansiping:{name:"段思平",type:"unit",faction:"dali",cost:5,atk:5,def:5,text:"大理太祖：理将+1/+1；抚绥", power:"lord_dali;lifelink"},
+  duansiping:{name:"段思平",type:"unit",faction:"dali",cost:5,atk:4,def:6,text:"大理太祖：理将+1/+1；抚绥", power:"lord_dali;lifelink"},
   /* 名品牌 */
   wuhou:     {name:"武侯羽扇", type:"sorcery", faction:"neutral", cost:3, text:"名品：所有将+1/+0，获得敏捷", power:"buff_board_1_0_haste"},
   zhouyu:    {name:"周瑜纶巾", type:"sorcery", faction:"song", cost:2, text:"名品：一个将+1/+1，获得先发", power:"buff_one_1_1_first"},
@@ -658,9 +658,9 @@ const CARD_DB = {
   wanyan_huangu:{name:"完颜拔离速",type:"unit",faction:"jin",cost:3,atk:3,def:2,text:"敏捷", power:"haste"},
 
   /* ===== 中立/叛军/高丽 ===== */
-  zhongxiang:{name:"钟相", type:"unit", faction:"qi", cost:3, atk:2, def:3, text:"楚王", power:null},
-  yangmo:    {name:"杨么", type:"unit", faction:"qi", cost:2, atk:2, def:2, text:"洞庭水寇", power:null},
-  shibin:    {name:"史斌", type:"unit", faction:"qi", cost:3, atk:3, def:2, text:"称帝", power:null},
+  zhongxiang:{name:"钟相", type:"unit", faction:"qi", cost:3, atk:2, def:3, text:"楚王：登场时若你控制三将，对手-2威望", power:"zhongxiang_etb"},
+  yangmo:    {name:"杨么", type:"unit", faction:"qi", cost:2, atk:2, def:2, text:"洞庭水寇：敏捷；在场时对手不能直接打玩家", power:"haste;river_raid"},
+  shibin:    {name:"史斌", type:"unit", faction:"qi", cost:3, atk:3, def:2, text:"称帝：穿喉；被消灭时对手弃1牌", power:"deathtouch;discard_on_death"},
   jinfushi:  {name:"金富轼", type:"unit", faction:"neutral", cost:1, atk:0, def:2, text:"高丽使：对手维持阶段-1粮", power:"opp_tax"},
   zhengzhichang:{name:"郑知常",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"高丽主战：敏捷", power:"haste"},
   zhengyinian:{name:"郑亿年",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"归朝人", power:null},
@@ -677,8 +677,8 @@ const CARD_DB = {
   zhaofujin: {name:"茂德帝姬",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"福金帝姬", power:null},
 
   /* ===== 宋后宫 ===== */
-  zhangguifei:{name:"张贵妃",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"后宫", power:null},
-  liuwanyi:  {name:"刘婉仪",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"内侍省", power:null},
+  zhangguifei:{name:"张贵妃",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"盛宠：登场时宋将+0/+1直到回合结束", power:"zhanggui_etb"},
+  liuwanyi:  {name:"刘婉仪",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"内侍省：横置可看对手手牌", power:"peek_on_tap"},
 
   /* ===== 金方文物/装备（神器类） ===== */
   tiefutu:   {name:"铁浮屠",type:"sorcery",faction:"jin",cost:2,text:"装备：一个金将+2/+2", power:"equip_2_2"},
@@ -717,8 +717,8 @@ const CARD_DB = {
   fuxin:     {name:"釜底抽薪",type:"sorcery",faction:"jin",cost:2,text:"毁对手1地", power:"destroy_land"},
   jinchan:   {name:"金蝉脱壳",type:"sorcery",faction:"neutral",cost:2,text:"本回合免疫一切", power:"immune_turn"},
   guanzimen: {name:"关门捉贼",type:"sorcery",faction:"song",cost:2,text:"消灭攻≤1的敌将", power:"kill_tiny"},
-  meiren:    {name:"美人计",type:"sorcery",faction:"pink",cost:1,text:"敌1将下回合不能攻击", power:"cant_attack_next"},
-  huanxiyuan:{name:"浣洗院",type:"sorcery",faction:"pink",cost:2,text:"目标敌将弹回手牌（北狩）", power:"bounce_one_enemy"},
+  meiren:    {name:"美人计",type:"instant",faction:"pink",cost:1,text:"瞬间：敌1将下回合不能攻击", power:"cant_attack_next"},
+  huanxiyuan:{name:"浣洗院",type:"instant",faction:"pink",cost:2,text:"瞬间：目标敌将弹回手牌（北狩）", power:"bounce_one_enemy"},
   kongcheng: {name:"空城计",type:"sorcery",faction:"song",cost:2,text:"本回合敌不能攻击", power:"enemy_no_attack"},
   fanjian:   {name:"反间计",type:"sorcery",faction:"neutral",cost:2,text:"敌两将互撞", power:"mutual_combat"},
   kourou:    {name:"苦肉计",type:"sorcery",faction:"song",cost:0,text:"我-3威望，抽3", power:"lose3_draw3"},
@@ -742,8 +742,8 @@ const CARD_DB = {
   caochang:  {name:"草场", type:"land", faction:"xixia", text:"贺兰草场：产1粮，召唤夏将时不横置"},
   muchang:   {name:"牧场", type:"land", faction:"xixia", text:"河西牧场：产1粮，横置时夏将+1/+0"},
   yanchi:    {name:"盐州", type:"land", faction:"xixia", text:"盐湖：产2粮，回合开始-1血"},
-  lianzhou:  {name:"善阐城", type:"land", faction:"dali", text:"大理都城：产1粮"},
-  tengyue:   {name:"腾越府", type:"land", faction:"dali", text:"西南边隘：产1粮"},
+  lianzhou:  {name:"善阐城", type:"land", faction:"dali", text:"大理都城：产1粮；若你控制理将，产2粮"},
+  tengyue:   {name:"腾越府", type:"land", faction:"dali", text:"西南边隘：产1粮；横置时造1伤给目标将（毒箭）"},
   /* 双色地 */
   huadong:   {name:"华东口岸", type:"land", faction:"neutral", text:"双色：可产宋粮或中立粮", dual:['song','neutral']},
   hebei_qian:{name:"河北三镇", type:"land", faction:"neutral", text:"双色：可产宋粮或金粮", dual:['song','jin']},
@@ -1054,6 +1054,12 @@ function recomputeBoard(){
 }
 function getAtk(c){return (CARD_DB[c.id].atk||0)+(c.buffAtk||0)+(c.weaken||0);}
 function getDef(c){return (CARD_DB[c.id].def||0)+(c.buffDef||0)+(c.weaken||0);}
+function hasPower(c,key){
+  const p=CARD_DB[c.id].power;
+  if(!p)return false;
+  if(Array.isArray(p))return p.includes(key);
+  return String(p).split(';').includes(key);
+}
 
 /* ---------- 渲染 ---------- */
 function render(){
@@ -1237,7 +1243,7 @@ function resolveTarget(oppIdx){
   const need=G.needChooseTarget;if(!need)return;
   const t=G.enemy.board[oppIdx];if(!t){G.needChooseTarget=null;render();return;}
   // 铁壁：不能被指定
-  if(t.ward||CARD_DB[t.id].power==='ward'){logMsg(`${CARD_DB[t.id].name} 有铁壁保护，不可指定。`);return;}
+  if(t.ward||hasPower(t,'ward')){logMsg(`${CARD_DB[t.id].name} 有铁壁保护，不可指定。`);return;}
   if(need.power==='kill_small'&&getAtk(t)>2){logMsg('该将攻>2，不可指定。');return;}
   G.needChooseTarget=null;
   playCard(need.handIdx,oppIdx);
@@ -1372,7 +1378,7 @@ function resolveSpell(power,ti){
       else logMsg('无金将可装备。');break;
     }
     case 'equip_haste':{
-      const t=me.board.find(c=>!CARD_DB[c.id].power==='haste');
+      const t=me.board.find(c=>!hasPower(c,'haste'));
       if(t){t.givenHaste=true;logMsg(`拐子马交于 ${CARD_DB[t.id].name}，获得敏捷。`);}
       else logMsg('无将可装备。');break;
     }
@@ -1621,7 +1627,7 @@ function runPhase(ph){
 
 function declareAttackers(){
   if(G.active!==0||(G.phase!=='precombat_main'&&G.phase!=='begin_combat'))return;
-  const canAttack=G.my.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste')&&CARD_DB[c.id].power!=='cant_attack');
+  const canAttack=G.my.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste'))&&!hasPower(c,'cant_attack'));
   if(canAttack.length===0){logMsg('无可攻之将。');return;}
   G.phase='declare_attack';
   pendingAttackers=[];attackTarget=null;
@@ -1647,7 +1653,7 @@ function confirmAttack(){
   setTimeout(()=>{
     if(attackTarget===null){
       // 打玩家：AI 选阻挡
-      const avail=G.enemy.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste'));
+      const avail=G.enemy.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste')));
       const sorted=pendingAttackers.map(i=>G.my.board[i]).sort((a,b)=>getAtk(b)-getAtk(a));
       for(const a of sorted){
         const can=avail.find(b=>getDef(b)>=getAtk(a));
@@ -1688,12 +1694,12 @@ function dealCombat(a,b){
   }
   if(b){
     let aAtk=getAtk(a)+atkBonus;
-    if(a.deathtouch||CARD_DB[a.id].power==='deathtouch')b.damageTaken=99;
+    if(a.deathtouch||hasPower(a,'deathtouch'))b.damageTaken=99;
     else b.damageTaken=(b.damageTaken||0)+aAtk;
     if(CARD_DB[a.id].power==='lifelink'){G.my.life+=aAtk;logMsg(`抚绥，+${aAtk}威望。`);}
     // 先发：若能杀死对方，对方不能反伤
     const willKill=(b.damageTaken||0)>=getDef(b);
-    const hasFirst=CARD_DB[a.id].power&&CARD_DB[a.id].power.includes('first_strike');
+    const hasFirst=hasPower(a,'first_strike');
     if(!(hasFirst&&willKill))a.damageTaken=(a.damageTaken||0)+getDef(b);
     if(aFaction==='dali')b.weaken=(b.weaken||0)-1;
     if(aFaction==='jin'){const ex=aAtk-getDef(b);if(ex>0){G.enemy.life-=ex;logMsg(`破阵${ex}直冲！`);}}
@@ -1761,10 +1767,10 @@ function aiTakeTurn(){
   }
   recomputeBoard();render();
   setTimeout(()=>{
-    const atk=ai.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste')&&CARD_DB[c.id].power!=='cant_attack');
+    const atk=ai.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste'))&&!hasPower(c,'cant_attack'));
     if(atk.length){
       atk.forEach(c=>c.tapped=true);
-      const mine=G.my.board.filter(c=>!c.tapped&&(!c.sick||CARD_DB[c.id].power==='haste'));
+      const mine=G.my.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste')));
       const pairs=[];
       for(const a of [...atk].sort((x,y)=>getAtk(y)-getAtk(x))){
         const can=mine.find(b=>getDef(b)>=getAtk(a));
