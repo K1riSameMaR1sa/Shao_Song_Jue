@@ -739,6 +739,7 @@ const CARD_DB = {
   token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_slave:{name:"奴隶",type:"unit",faction:"jin",cost:0,atk:1,def:1,text:"劳作", power:null, isToken:true},
   token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"在场时金将+1/+0；被消灭时宋主-2威望（靖康之耻）", power:"nü_buff_jin", isToken:true},
+  shixiu_form:{name:"石秀（拼命）",type:"unit",faction:"neutral",cost:0,atk:8,def:8,text:"敏捷；舍命（每回合-1/-1）", power:"haste;sheming", isToken:true},
   /* 梁山一百零八将 */
   songjiang: {name:"宋江", type:"unit", faction:"neutral", cost:4, atk:2, def:5, text:"及时雨：登场抽1；在场时中立将+0/+1", power:"songjiang_etb"},
   lujunyi: {name:"卢俊义", type:"unit", faction:"neutral", cost:6, atk:7, def:6, text:"玉麒麟：单挑王（战斗+2/+0）；先发；穿喉", power:"first_strike;deathtouch"},
@@ -771,8 +772,7 @@ const CARD_DB = {
   ruanwu:  {name:"阮小五", type:"unit", faction:"neutral", cost:2, atk:3, def:2, text:"短命二郎：穿喉", power:"deathtouch"},
   zhangshun:{name:"张顺",type:"unit",faction:"neutral",cost:3,atk:3,def:3,text:"浪里白条：敏捷；铁壁", power:"haste;ward"},
   ruanqi:  {name:"阮小七", type:"unit", faction:"neutral", cost:2, atk:3, def:2, text:"活阎罗：先发", power:"first_strike"},
-  yangxiong:{name:"杨雄",type:"unit",faction:"neutral",cost:3,atk:3,def:3,text:"病关索：铁壁", power:"ward"},
-  shixiu:  {name:"石秀", type:"unit", faction:"neutral", cost:2, atk:3, def:2, text:"拼命三郎：敏捷；穿喉", power:"haste;deathtouch"},
+  yangxiong_shixiu:{name:"杨雄·石秀",type:"unit",faction:"neutral",cost:4,atk:4,def:3,text:"病关索：铁壁；死后转为石秀8/8敏捷，舍命（每回合-1/-1）", power:"ward;transform_shixiu"},
   xiezhen:{name:"解珍",type:"unit",faction:"neutral",cost:2,atk:3,def:2,text:"两头蛇：先发", power:"first_strike"},
   xiebao:  {name:"解宝", type:"unit", faction:"neutral", cost:2, atk:3, def:2, text:"双尾蝎：先发", power:"first_strike"},
   yanqing: {name:"燕青", type:"unit", faction:"neutral", cost:3, atk:3, def:2, text:"浪子：敏捷；登场看对手手牌", power:"haste;peek_etb"},
@@ -1627,6 +1627,7 @@ function cleanupDead(){
   [G.my,G.enemy].forEach((p,pi)=>{
     const opp=pi===0?G.enemy:G.my;
     const alive=[];
+    let transformToShixiu=false;
     p.board.forEach(c=>{
       if((c.damageTaken||0)>=getDef(c)){
         p.grave.push(c.id);
@@ -1637,10 +1638,12 @@ function cleanupDead(){
         if(pw==='death_draw1'){drawTo(p,1);logMsg(`${CARD_DB[c.id].name} 死后留书，抽1。`);}
         if(c.id==='token_nü'){opp.life-=2;logMsg(`女奴惨死，宋主-2威望（靖康之耻）。`);}
         if(hasPower(c,'huiguang')){opp.board.forEach(t=>{t.damageTaken=(t.damageTaken||0)+6;});logMsg(`林冲回光返照！对所有敌将造6伤（同归于尽）。`);}
+        if(hasPower(c,'transform_shixiu')){transformToShixiu=true;logMsg(`杨雄战死，石秀悲愤变身！8/8敏捷，舍命。`);}
       }
       else alive.push(c);
     });
     p.board=alive;p.board.forEach(c=>c.damageTaken=0);
+    if(transformToShixiu)p.board.push({id:'shixiu_form',tapped:false,sick:false});
   });
   recomputeBoard();
 }
@@ -1729,6 +1732,8 @@ function runPhase(ph){
         p.lands.forEach(l=>l.tapped=false);
       }
       p.board.forEach(c=>{c.tapped=false;c.sick=false;c.weaken=0;});
+      // 舍命：石秀每回合-1/-1
+      p.board.forEach(c=>{if(hasPower(c,'sheming')){c.weaken=(c.weaken||0)-1;c.buffDef=(c.buffDef||0)-1;}});
       p.manaMax=p.lands.length;
       p.mana=p.manaMax+(p.permanentManaBonus||0);
       if(p.chongxue&&p.chongxue.includes('daoxue')){p.mana+=1;logMsg('道学：无为而治，+1粮。');}
