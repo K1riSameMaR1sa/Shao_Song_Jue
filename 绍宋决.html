@@ -780,18 +780,23 @@ function logMsg(s){
   box.innerHTML=G.log.slice(-40).map(l=>`<p>› ${l}</p>`).join('');
   box.scrollTop=box.scrollHeight;
 }
+function rollChongxue(){
+  const roll=Math.floor(Math.random()*20)+1;
+  const schools=[];
+  if(roll<=10)schools.push('jingxue');
+  if(roll>=10&&roll<=15)schools.push('lixue');
+  if(roll>=15)schools.push('daoxue');
+  return {roll,schools};
+}
 function chongxueJudge(){
   if(G.active!==0){logMsg('非你的回合。');return;}
   if(G.my.chongxue!==null){logMsg('已判定，可辩论重投。');return;}
   if(G.my.mana<1){logMsg('粮草不足。');return;}
   G.my.mana-=1;
-  const roll=Math.floor(Math.random()*20)+1;
-  let school,name;
-  if(roll<=10){school='jingxue';name='经学';}
-  else if(roll<=15){school='lixue';name='理学';}
-  else{school='daoxue';name='道学';}
-  G.my.chongxue=school;
-  logMsg(`崇学判定：掷出 <b>${roll}</b> → 定为「${name}」！效果持续整局。`);
+  const {roll,schools}=rollChongxue();
+  G.my.chongxue=schools;
+  const nameMap={jingxue:'经学',lixue:'理学',daoxue:'道学'};
+  logMsg(`崇学判定：掷出 <b>${roll}</b> → 定为「${schools.map(s=>nameMap[s]).join('+')}」！`);
   applyChongxue();
   render();
 }
@@ -800,20 +805,17 @@ function chongxueDebate(){
   if(G.my.chongxue===null){logMsg('尚未判定。');return;}
   if(G.my.mana<1){logMsg('粮草不足。');return;}
   G.my.mana-=1;
-  const roll=Math.floor(Math.random()*20)+1;
-  let school,name;
-  if(roll<=10){school='jingxue';name='经学';}
-  else if(roll<=15){school='lixue';name='理学';}
-  else{school='daoxue';name='道学';}
-  G.my.chongxue=school;
-  logMsg(`辩论重投：掷出 <b>${roll}</b> → 改为「${name}」！`);
+  const {roll,schools}=rollChongxue();
+  G.my.chongxue=schools;
+  const nameMap={jingxue:'经学',lixue:'理学',daoxue:'道学'};
+  logMsg(`辩论重投：掷出 <b>${roll}</b> → 改为「${schools.map(s=>nameMap[s]).join('+')}」！`);
   render();
 }
 function applyChongxue(){
-  const s=G.my.chongxue;
-  if(s==='jingxue')logMsg('经学：每回合抽牌阶段多抽1张。');
-  else if(s==='lixue')logMsg('理学：所有将+0/+1。');
-  else if(s==='daoxue')logMsg('道学：每回合重置阶段额外+1粮。');
+  const s=G.my.chongxue||[];
+  if(s.includes('jingxue'))logMsg('经学：每回合抽牌阶段多抽1张。');
+  if(s.includes('lixue'))logMsg('理学：所有将+0/+1。');
+  if(s.includes('daoxue'))logMsg('道学：每回合重置阶段额外+1粮。');
 }
 /* 战报面板折叠+拖动 */
 (function(){
@@ -984,7 +986,7 @@ function recomputeBoard(){
   [G.my,G.enemy].forEach(p=>{
     p.board.forEach(c=>{c.buffAtk=0;c.buffDef=0;});
     // 理学：所有将+0/+1
-    if(p.chongxue==='lixue')p.board.forEach(c=>c.buffDef++);
+    if(p.chongxue&&p.chongxue.includes('lixue'))p.board.forEach(c=>c.buffDef++);
   });
   // 领袖光环
   [G.my,G.enemy].forEach(p=>{
@@ -1028,8 +1030,8 @@ function render(){
   document.getElementById('attack-btn').textContent=G.phase==='declare_attack'?'开打':'开战';
   document.getElementById('next-phase-btn').disabled=G.active!==0;
   document.getElementById('cancel-target-btn').style.display=G.needChooseTarget?'inline-block':'none';
-  document.getElementById('chongxue-btn').style.display=(G.active===0&&G.my.chongxue===null)?'inline-block':'none';
-  document.getElementById('debate-btn').style.display=(G.active===0&&G.my.chongxue!==null)?'inline-block':'none';
+  document.getElementById('chongxue-btn').style.display=(G.active===0&&!G.my.chongxue)?'inline-block':'none';
+  document.getElementById('debate-btn').style.display=(G.active===0&&G.my.chongxue)?'inline-block':'none';
   document.querySelectorAll('#my-board .card').forEach((el,i)=>{
     if(G.phase==='declare_attack'&&pendingAttackers.includes(i))el.classList.add('selected');
   });
@@ -1425,7 +1427,7 @@ function runPhase(ph){
       p.board.forEach(c=>{c.tapped=false;c.sick=false;c.weaken=0;});
       p.manaMax=p.lands.length;
       p.mana=p.manaMax+(p.permanentManaBonus||0);
-      if(p.chongxue==='daoxue'){p.mana+=1;logMsg('道学：无为而治，+1粮。');}
+      if(p.chongxue&&p.chongxue.includes('daoxue')){p.mana+=1;logMsg('道学：无为而治，+1粮。');}
       p.landsPlayedThisTurn=0;
       logMsg('—— 重置阶段 ——');
       break;
@@ -1435,7 +1437,7 @@ function runPhase(ph){
       logMsg('—— 维持阶段 ——');
       break;
     case 'draw':
-      if(G.turn>1){drawTo(p,1);if(p.chongxue==='jingxue'){drawTo(p,1);logMsg('经学：学以致用，额外抽1。');}}
+      if(G.turn>1){drawTo(p,1);if(p.chongxue&&p.chongxue.includes('jingxue')){drawTo(p,1);logMsg('经学：学以致用，额外抽1。');}}
       logMsg('—— 抽牌阶段 ——');
       break;
     case 'precombat_main':
