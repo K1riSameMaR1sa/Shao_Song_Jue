@@ -746,7 +746,7 @@ const CARD_DB = {
   wuyong:  {name:"吴用", type:"unit", faction:"neutral", cost:2, atk:0, def:4, text:"智多星：登场看对手手牌", power:"peek_etb"},
   linchong:{name:"林冲", type:"unit", faction:"neutral", cost:4, atk:6, def:5, text:"豹子头：先发；穿喉；铁壁；回光（阵亡时对所有敌将造6伤）", power:"first_strike;ward;deathtouch;huiguang"},
   lushisen:{name:"鲁智深",type:"unit",faction:"neutral",cost:4,atk:5,def:6,text:"花和尚：铁壁；穿喉", power:"ward;deathtouch"},
-  wusong:  {name:"武松", type:"unit", faction:"neutral", cost:3, atk:5, def:4, text:"行者：敏捷；先发", power:"haste;first_strike"},
+  wusong:  {name:"武松", type:"unit", faction:"neutral", cost:3, atk:5, def:4, text:"行者：敏捷；先发；单臂擒贼（首次受伤时，若被武将攻击则斩杀攻击方；若被法术伤害则斩杀任意1敌将）", power:"haste;first_strike;qinzei"},
   yangzhi: {name:"杨志", type:"unit", faction:"neutral", cost:3, atk:3, def:3, text:"青面兽：铁壁", power:"ward"},
   likui:   {name:"李逵", type:"unit", faction:"neutral", cost:3, atk:6, def:3, text:"黑旋风：敏捷；攻宋将+1", power:"haste;counter_song"},
   huarong: {name:"花荣", type:"unit", faction:"neutral", cost:3, atk:3, def:2, text:"小李广：穿喉；敏捷", power:"deathtouch;haste"},
@@ -1514,7 +1514,14 @@ function resolveSpell(power,ti){
       if(ti===undefined)break;
       const t=opp.board[ti];const d=power==='deal3_to_unit'?3:2;
       t.damageTaken=(t.damageTaken||0)+d;
-      logMsg(`对 ${CARD_DB[t.id].name} 造成${d}伤。`);cleanupDead();break;
+      logMsg(`对 ${CARD_DB[t.id].name} 造成${d}伤。`);
+      // 武松单臂擒贼：被法术伤害时，斩杀任意1敌将
+      if(t.id==='wusong'&&!t.qinzeiUsed){
+        t.qinzeiUsed=true;
+        const killTarget=opp.board.find(c=>c.id!=='wusong');
+        if(killTarget){killTarget.damageTaken=99;logMsg(`武松单臂擒贼（法术反击）！斩杀${CARD_DB[killTarget.id].name}！`);}
+      }
+      cleanupDead();break;
     }
     case 'weaken_1_1':{
       if(ti===undefined)break;
@@ -1883,6 +1890,12 @@ function dealCombat(a,b){
     if(aFaction==='dali')b.weaken=(b.weaken||0)-1;
     if(aFaction==='jin'){const ex=aAtk-getDef(b);if(ex>0){G.enemy.life-=ex;logMsg(`破阵${ex}直冲！`);}}
     logMsg(`${CARD_DB[a.id].name} 与 ${CARD_DB[b.id].name} 交战！`);
+    // 武松单臂擒贼：首次被武将攻击时，斩杀攻击方
+    if(b.id==='wusong'&&!b.qinzeiUsed){
+      b.qinzeiUsed=true;
+      a.damageTaken=99;
+      logMsg(`武松单臂擒贼！斩杀${CARD_DB[a.id].name}！`);
+    }
   }else{
     let aAtk=getAtk(a)+atkBonus;
     G.enemy.life-=aAtk;
