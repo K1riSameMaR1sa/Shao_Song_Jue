@@ -551,6 +551,7 @@ const CARD_DB = {
   liji:      {name:"礼记", type:"sorcery", faction:"song", cost:2, text:"名品：所有将获得铁壁（克己复礼）", power:"all_ward"},
   chongxue:  {name:"崇学", type:"sorcery", faction:"song", cost:3, text:"名品：进场后可花1粮崇学判定（d20）；再花1粮辩论可重投。效果持续整局", power:"chongxue_etb"},
   zongjiao:  {name:"崇教", type:"sorcery", faction:"neutral", cost:3, text:"名品：掷d20判定推崇道/佛/民间教，效果持续整局", power:"zongjiao_etb"},
+  yuanxue:   {name:"推崇原学", type:"sorcery", faction:"song", cost:3, text:"名品：持续整局，对手的计策（瞬间）不能指定你场上的将为目标", power:"yuanxue_etb"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1201,8 +1202,7 @@ function resolveSpell(power,ti){
       me.chongxue=null;/* 未判定 */
       logMsg('「崇学」已立。花1粮可崇学判定（d20），再花1粮可辩论重投。');
       break;
-    case 'zongjiao_etb':{
-      const roll=Math.floor(Math.random()*20)+1;
+    case 'zongjiao_etb':{      const roll=Math.floor(Math.random()*20)+1;
       const religions=[];
       if(roll<=11)religions.push('taoism');
       if(roll>=12&&roll<=13)religions.push('syncretic');
@@ -1217,6 +1217,10 @@ function resolveSpell(power,ti){
       if(religions.includes('folk'))logMsg('民间教：祆摩流传，每回合抽牌阶段额外抽1。');
       break;
     }
+    case 'yuanxue_etb':
+      me.yuanxue=true;
+      logMsg('「推崇原学」：对手的计策（瞬间）不能指定你场上的将为目标，持续整局。');
+      break;
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
     case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
@@ -1604,7 +1608,12 @@ function aiTakeTurn(){
       if(p.db.power==='heal_both1_etb'){ai.life++;G.my.life++;}
       logMsg(`<span style="color:#a080ff">${ai.name}</span> 派出 ${p.db.name}。`);acted=true;continue;
     }
-    const sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>x.db.type==='sorcery'&&x.db.cost<=ai.mana);
+    let sp=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]})).filter(x=>(x.db.type==='sorcery'||x.db.type==='instant')&&x.db.cost<=ai.mana);
+    // 推崇原学：对手计策不能指定我方场上将
+    if(G.my.yuanxue){
+      const protectPowers=['kill_small','deal3_to_unit','deal2_to_unit','weaken_1_1','bounce_one_enemy'];
+      sp=sp.filter(x=>!protectPowers.includes(x.db.power));
+    }
     if(sp.length){
       const p=sp[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);ai.grave.push(p.id);
       aiResolveSpell(p.db);acted=true;continue;
