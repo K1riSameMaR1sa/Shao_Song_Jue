@@ -2421,17 +2421,26 @@ function joinRoom(){document.getElementById('room-status').textContent='联机�
  * 图鉴
  * ============================================================ */
 let codexFilter='all';
+let codexSearch='';
 function showCodex(){
   showScreen('codex-screen');
   buildCodexFilter();
   renderCodex();
 }
 function buildCodexFilter(){
-  const filters=[['all','全部'],['unit','将领'],['sorcery','名品'],['instant','计策'],['land','州府'],
-    ['song','宋红'],['jin','金黄'],['xixia','夏绿'],['dali','大理紫'],['neutral','中立蓝'],['pink','后宫粉'],['token','衍生物']];
-  document.getElementById('codex-filter').innerHTML=filters.map(([k,v])=>
-    `<button class="action-btn" style="padding:6px 14px;font-size:12px;background:${codexFilter===k?'var(--zhu)':'var(--paper)'};color:${codexFilter===k?'#fff':'var(--ink)'}" onclick="codexFilter='${k}';buildCodexFilter();renderCodex()">${v}</button>`
-  ).join('');
+  const types=[['all','全部'],['unit','将领'],['item','名品'],['instant','计策'],['land','州府'],['token','衍生物']];
+  const colors=[['song','宋红'],['jin','金黄'],['xixia','夏绿'],['dali','大理紫'],['neutral','中立蓝'],['pink','后宫粉']];
+  let html='<input type="text" placeholder="搜索牌名..." value="'+codexSearch+'" oninput="codexSearch=this.value;renderCodex()" style="width:100%;padding:8px 12px;margin-bottom:8px;border:1px solid var(--ink-soft);border-radius:4px;font-size:13px;background:var(--paper);color:var(--ink)">';
+  html+='<div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px">';
+  types.forEach(([k,v])=>{
+    html+=`<button class="action-btn" style="padding:4px 10px;font-size:11px;background:${codexFilter===k?'var(--ink)':'var(--paper)'};color:${codexFilter===k?'#fff':'var(--ink)'};border:1px solid var(--ink-soft)" onclick="codexFilter='${k}';buildCodexFilter();renderCodex()">${v}</button>`;
+  });
+  html+='</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
+  colors.forEach(([k,v])=>{
+    html+=`<button class="action-btn" style="padding:4px 10px;font-size:11px;background:${codexFilter===k?'var(--ink)':'var(--paper)'};color:${codexFilter===k?'#fff':'var(--ink)'};border:1px solid var(--ink-soft)" onclick="codexFilter='${k}';buildCodexFilter();renderCodex()">${v}</button>`;
+  });
+  html+='</div>';
+  document.getElementById('codex-filter').innerHTML=html;
 }
 function renderCodex(){
   const grid=document.getElementById('codex-grid');
@@ -2442,11 +2451,18 @@ function renderCodex(){
     cards=Object.entries(CARD_DB).filter(([id,c])=>!c.isToken);
   }
   const filtered=cards.filter(([id,c])=>{
-    if(codexFilter==='all'||codexFilter==='token') return true;
-    if(['unit','sorcery','instant','land'].includes(codexFilter)) return c.type===codexFilter;
-    return c.faction===codexFilter;
+    if(codexFilter==='token') return c.isToken;
+    if(codexFilter==='unit') return c.type==='unit'&&!c.isToken;
+    if(codexFilter==='item') return (c.type==='item'||c.type==='sorcery')&&!c.isToken;
+    if(codexFilter==='instant') return c.type==='instant'&&!c.isToken;
+    if(codexFilter==='land') return c.type==='land'&&!c.isToken;
+    if(['song','jin','xixia','dali','neutral','pink'].includes(codexFilter)) return c.faction===codexFilter;
+    return true;
+  }).filter(([id,c])=>{
+    if(!codexSearch) return true;
+    return c.name.includes(codexSearch)||(c.text||'').includes(codexSearch);
   });
-  grid.innerHTML=filtered.map(([id,c])=>{
+  grid.innerHTML=`<p style="font-size:12px;color:#666;margin-bottom:8px">共 ${filtered.length} 张牌</p>`+filtered.map(([id,c])=>{
     const cost=c.cost!==undefined?c.cost:'·';
     const stats=c.type==='unit'?`${c.atk}/${c.def}`:'';
     const art=c.type==='unit'?c.name[0]:c.type==='land'?'府':'计';
