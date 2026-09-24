@@ -2385,16 +2385,50 @@ function renderDeckPreview(){
 }
 function showCardDetail(id){
   const c=CARD_DB[id];if(!c)return;
-  const typeMap={unit:'将领',land:'州府',instant:'瞬间',item:'名品',spell:'法术',sorcery:'名品'};
-  const factionMap={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立（蓝）',pink:'后宫（粉）'};
+  const typeMap={unit:'将领',land:'州府',instant:'瞬间计策',item:'名品',sorcery:'名品',spell:'法术'};
+  const factionMap={song:'宋·红',jin:'金·金黄',xixia:'西夏·绿',dali:'大理·紫',neutral:'中立·蓝',pink:'后宫·粉'};
+  const factionColor={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e8c'};
+  const fc=factionColor[c.faction]||'#666';
+  const cost=c.cost!==undefined?c.cost:'·';
+  const stats=c.type==='unit'?`${c.atk}/${c.def}`:'';
+  const art=c.type==='unit'?c.name[0]:c.type==='land'?'府':c.type==='instant'?'计':'品';
+  // 历史摘录
+  const quotes={
+    'zhaogou':'"但得一寸土，便留一寸心。"——宋高宗赵构',
+    'yuefei':'"靖康耻，犹未雪。臣子恨，何时灭！"——岳飞《满江红》',
+    'hanshizhong':'"上马击狂胡，下马草军书。"——韩世忠',
+    'liqingzhao':'"生当作人杰，死亦为鬼雄。"——李清照《夏日绝句》',
+    'lianghongyu':'"巾帼不让须眉，红颜更胜儿郎。"——梁红玉',
+    'wuzhu':'"直把杭州作汴州。"——林升《题临安邸》',
+    'gongsunsheng':'"袖里乾坤大，壶中日月长。"——公孙胜',
+    'linchong':'"仗义是林冲，为人最朴忠。"——林冲',
+    'wusong':'"武松打虎，威震景阳冈。"',
+    'songjiang':'"他年若得报冤仇，血染浔阳江口。"——宋江《西江月》'
+  };
+  const quote=quotes[id]||'（《绍宋》及两宋风云录）';
   const html=`
     <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px" onclick="this.remove()">
-      <div style="background:linear-gradient(135deg,#2c1810,#1a0f0a);border:2px solid #d4a017;border-radius:8px;padding:20px;max-width:400px;width:100%;max-height:85vh;overflow-y:auto;color:#f0e6d2" onclick="event.stopPropagation()">
-        <h2 style="margin:0 0 8px 0;color:#d4a017;font-size:18px">${c.name}</h2>
-        <p style="margin:4px 0;font-size:12px;color:#c9b896">${factionMap[c.faction]||''} · ${typeMap[c.type]||c.type} · ${c.cost||0}费${c.type==='unit'?` · ${c.atk}/${c.def}`:''}</p>
-        <hr style="border-color:#d4a01733;margin:12px 0">
-        <p style="line-height:1.8;font-size:14px;color:#f0e6d2">${c.text||'无特殊效果'}</p>
-        <button class="menu-btn ghost" style="margin-top:16px;width:100%;padding:10px" onclick="this.closest('[style*=fixed]').remove()">关闭</button>
+      <div style="background:var(--paper);border:3px solid var(--ink);border-radius:8px;width:100%;max-width:340px;max-height:90vh;overflow-y:auto;position:relative" onclick="event.stopPropagation()">
+        <!-- 成本球 -->
+        <div style="position:absolute;top:-6px;left:-6px;width:36px;height:36px;border-radius:50%;background:var(--qing);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--ink)">${cost}</div>
+        <!-- 名字条 -->
+        <div style="background:var(--ink);color:#fff;text-align:center;padding:10px 8px 8px;margin-bottom:8px">
+          <div style="font-size:16px;font-weight:700">${c.name}</div>
+          <div style="font-size:10px;color:#ccc;margin-top:2px">${factionMap[c.faction]||''} · ${typeMap[c.type]||c.type}${c.type==='unit'?` · 武将`:''}</div>
+        </div>
+        <!-- 艺术框 -->
+        <div style="height:120px;margin:0 12px;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;color:#fff;border-radius:4px;background:linear-gradient(135deg,${fc},var(--ink-soft))">${art}</div>
+        <!-- 效果文字 -->
+        <div style="margin:12px;padding:10px;background:rgba(0,0,0,0.05);border-radius:4px;font-size:13px;line-height:1.8;color:var(--ink)">
+          ${c.text||'无特殊效果'}
+        </div>
+        <!-- 身材 -->
+        ${stats?`<div style="position:absolute;bottom:-6px;right:-6px;background:var(--tie);color:#fff;padding:4px 12px;font-size:16px;font-weight:700;border-radius:4px;border:2px solid var(--ink)">${stats}</div>`:''}
+        <!-- 历史摘录 -->
+        <div style="margin:0 12px 12px;padding:8px;background:rgba(212,160,23,0.1);border-left:3px solid #d4a017;font-size:11px;line-height:1.6;color:#666;font-style:italic">
+          ${quote}
+        </div>
+        <button class="menu-btn ghost" style="margin:0 12px 12px;width:calc(100% - 24px);padding:10px" onclick="this.closest('[style*=fixed]').remove()">关闭</button>
       </div>
     </div>`;
   document.body.insertAdjacentHTML('beforeend',html);
