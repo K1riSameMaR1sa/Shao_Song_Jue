@@ -738,7 +738,7 @@ const CARD_DB = {
   token_minfu:{name:"民夫",type:"unit",faction:"song",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_slave:{name:"奴隶",type:"unit",faction:"jin",cost:0,atk:1,def:1,text:"劳作", power:null, isToken:true},
-  token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"在场时金将+1/+0；被消灭时金主-2威望", power:"nü_buff_jin", isToken:true},
+  token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"在场时金将+1/+0；被消灭时宋主-2威望（靖康之耻）", power:"nü_buff_jin", isToken:true},
 
   /* ===== 州府/地 ===== */
   kaiifeng:  {name:"开封府", type:"land", faction:"song", text:"大宋都城：产1粮"},
@@ -1515,7 +1515,7 @@ function cleanupDead(){
         if(pw==='death_damage2'){opp.life-=2;logMsg(`${CARD_DB[c.id].name} 殉国，对手-2威望！`);}
         if(pw==='death_damage1'){opp.life-=1;logMsg(`${CARD_DB[c.id].name} 殉节，对手-1威望！`);}
         if(pw==='death_draw1'){drawTo(p,1);logMsg(`${CARD_DB[c.id].name} 死后留书，抽1。`);}
-        if(c.id==='token_nü'){p.life-=2;logMsg(`女奴惨死，金主-2威望（民怨）。`);}
+        if(c.id==='token_nü'){opp.life-=2;logMsg(`女奴惨死，宋主-2威望（靖康之耻）。`);}
       }
       else alive.push(c);
     });
