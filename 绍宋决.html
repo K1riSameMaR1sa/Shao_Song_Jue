@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v1.0.2-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v1.0.3-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -290,7 +290,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v1.0.2-beta</h3>
+    <h3>当前版本 v1.0.3-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫伪齐七阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -552,6 +552,9 @@ const CARD_DB = {
   chongxue:  {name:"崇学", type:"sorcery", faction:"song", cost:3, text:"名品：进场后可花1粮崇学判定（d20）；再花1粮辩论可重投。效果持续整局", power:"chongxue_etb"},
   zongjiao:  {name:"崇教", type:"sorcery", faction:"neutral", cost:3, text:"名品：掷d20判定推崇道/佛/民间教，效果持续整局", power:"zongjiao_etb"},
   yuanxue:   {name:"推崇原学", type:"sorcery", faction:"song", cost:3, text:"名品：持续整局，对手的计策（瞬间）不能指定你场上的将为目标", power:"yuanxue_etb"},
+  chenmo:    {name:"沉默", type:"instant", faction:"neutral", cost:2, text:"瞬间：康掉对手下一个法术/瞬间", power:"counter_next"},
+  fengbo:    {name:"封驳", type:"instant", faction:"song", cost:1, text:"瞬间：康掉对手下一个名品（不能康计策）", power:"counter_sorcery_only"},
+  duanzhang: {name:"断章", type:"instant", faction:"neutral", cost:3, text:"瞬间：康掉对手下一个法术/瞬间，且抽1牌", power:"counter_next_draw1"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -1071,9 +1074,12 @@ function bindClicks(p,prefix){
   const isMe=prefix==='my';const myTurn=G.active===0;
   if(isMe){
     document.querySelectorAll('#my-hand .card').forEach(el=>{el.onclick=()=>{
-      if(!myTurn)return;
       const hc=G.my.hand[+el.dataset.idx];if(!hc)return;
       const db=CARD_DB[hc.id];
+      const counterPowers=['counter_next','counter_sorcery_only','counter_next_draw1'];
+      const isCounter=counterPowers.includes(db.power);
+      // counter 牌在对手回合也能用
+      if(!myTurn&&!isCounter){logMsg('非你的回合。');return;}
       // 名品牌（sorcery）只能主阶段用；计策（instant）任意阶段可用
       if(db.type==='sorcery'&&G.phase!=='precombat_main'&&G.phase!=='postcombat_main')return;
       onHandCardClick(+el.dataset.idx);
@@ -1220,6 +1226,19 @@ function resolveSpell(power,ti){
     case 'yuanxue_etb':
       me.yuanxue=true;
       logMsg('「推崇原学」：对手的计策（瞬间）不能指定你场上的将为目标，持续整局。');
+      break;
+    case 'counter_next':
+      me.counterSpell=true;
+      logMsg('「沉默」：对手下一个法术/瞬间将被康。');
+      break;
+    case 'counter_sorcery_only':
+      me.counterSorceryOnly=true;
+      logMsg('「封驳」：对手下一个名品将被康。');
+      break;
+    case 'counter_next_draw1':
+      me.counterSpell=true;
+      me.counterDraw1=true;
+      logMsg('「断章」：对手下一个法术/瞬间将被康，康后抽1。');
       break;
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
@@ -1615,7 +1634,26 @@ function aiTakeTurn(){
       sp=sp.filter(x=>!protectPowers.includes(x.db.power));
     }
     if(sp.length){
-      const p=sp[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);ai.grave.push(p.id);
+      const p=sp[0];
+      // 检查counter
+      let countered=false;
+      if(G.my.counterSpell){
+        countered=true;
+        logMsg(`「${CARD_DB[p.id].name}」被康！`);
+        if(G.my.counterDraw1){drawTo(G.my,1);logMsg('断章：抽1牌。');G.my.counterDraw1=false;}
+        G.my.counterSpell=false;
+      }else if(G.my.counterSorceryOnly&&p.db.type==='sorcery'){
+        countered=true;
+        logMsg(`「${CARD_DB[p.id].name}」被封驳康掉！`);
+        G.my.counterSorceryOnly=false;
+      }
+      if(countered){
+        /* 牌回手，不结算 */
+        ai.hand.splice(p.i,1);
+        ai.hand.push(p.id);
+        continue;
+      }
+      ai.mana-=p.db.cost;ai.hand.splice(p.i,1);ai.grave.push(p.id);
       aiResolveSpell(p.db);acted=true;continue;
     }
   }
