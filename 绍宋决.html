@@ -172,7 +172,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <button class="menu-btn" onclick="showRules()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">游戏规则</button>
     <button class="menu-btn" onclick="showProject()" style="background:var(--paper);color:var(--ink);border-color:var(--ink)">更新介绍</button>
   </div>
-  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.3.0-beta</div>
+  <div class="version-tag">基于《绍宋》榴弹怕水 著 · 同人非商用 v3.3.1-beta</div>
 </div>
 
 <!-- 图鉴 -->
@@ -291,7 +291,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <p style="text-align:center;color:var(--ink-soft);margin-bottom:20px">基于榴弹怕水《绍宋》的网页卡牌对战游戏 · 单文件自包含</p>
     <h3>项目简介</h3>
     <p>《绍宋决》是一款以南宋初年为背景的集换式卡牌对战游戏（TCG），规则参考万智牌（MTG），题材取自穿越小说《绍宋》。玩家扮演宋主赵玖或金朗主，率领群臣将领、运用计策名品，在颜色轮相生相克中决一胜负。</p>
-    <h3>当前版本 v3.3.0-beta</h3>
+    <h3>当前版本 v3.3.1-beta</h3>
     <ul>
       <li>120+ 张卡牌：宋金夏理中立后宫六阵营</li>
       <li>完整 MTG 阶段流（12 阶段手动推进）</li>
@@ -308,7 +308,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     <h3>更新归档</h3>
     <div id="update-archive" style="margin-bottom:20px">
       <div style="border:1px solid var(--ink-soft);border-radius:4px;margin-bottom:8px">
-        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.3.0-beta ▸</div>
+        <div onclick="toggleUpdate(this)" style="padding:10px 14px;cursor:pointer;font-weight:bold;background:rgba(0,0,0,0.03)">v3.3.1-beta ▸</div>
         <div style="padding:10px 14px;display:none;line-height:1.8">
           <ul>
             <li>套牌查看界面重做：mana曲线图+类型统计+按费用分组+15张备牌</li>
@@ -580,7 +580,7 @@ const CARD_DB = {
   liqiong:   {name:"郦琼", type:"unit", faction:"jin", cost:2, atk:2, def:2, text:"宋降将：铁壁", power:"ward"},
   zongze:    {name:"宗泽", type:"unit", faction:"song", cost:5, atk:3, def:6, text:"东京留守：宋将+0/+1；登场生2民夫", power:"lord_tough;token_minfu_etb"},
   ligang:    {name:"李纲", type:"unit", faction:"song", cost:4, atk:2, def:5, text:"主战旗帜：宋将攻击+1", power:"song_attack_boost"},
-  chenggui:  {name:"陈规", type:"unit", faction:"song", cost:2, atk:0, def:5, text:"守城专家：铁壁", power:"ward"},
+  chenggui:  {name:"陈规", type:"unit", faction:"song", cost:3, atk:1, def:4, text:"守德安：城防（宋将+0/+1）；进场召2火枪兵；横置火炮：敌将各受1伤", power:"chenggui_etb;chenggui_fortify;chenggui_cannon"},
   liuqi:     {name:"刘錡", type:"unit", faction:"song", cost:3, atk:3, def:3, text:"顺昌之威：先发；攻金将+1", power:"first_strike;counter_jin"},
   niugao:    {name:"牛皋", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"与岳飞同场+1/+0；敏捷", power:"haste"},
   zhangxian: {name:"张宪", type:"unit", faction:"song", cost:2, atk:2, def:2, text:"与岳飞同场+1/+1；敏捷", power:"haste"},
@@ -815,6 +815,7 @@ const CARD_DB = {
   token_cav: {name:"骑兵",type:"unit",faction:"neutral",cost:0,atk:2,def:2,text:"敏捷", power:"haste", isToken:true},
   token_ax:  {name:"刀斧手",type:"unit",faction:"neutral",cost:0,atk:2,def:3,text:"重步", power:null, isToken:true},
   token_archer:{name:"弓箭手",type:"unit",faction:"neutral",cost:0,atk:1,def:2,text:"穿喉", power:"deathtouch", isToken:true},
+  token_huoqiang:{name:"火枪兵",type:"unit",faction:"song",cost:0,atk:1,def:1,text:"远程：攻击时不能被阻挡", power:"cannot_be_blocked", isToken:true},
   token_guard:{name:"亲兵",type:"unit",faction:"neutral",cost:0,atk:0,def:3,text:"铁壁", power:"ward", isToken:true},
   token_minfu:{name:"民夫",type:"unit",faction:"song",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
   token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
@@ -2100,17 +2101,28 @@ function aiTakeTurn(){
   let acted=true;
   while(acted){
     acted=false;
-    // 2. 出牌：优先下能出的最便宜的单位（避免卡手），而不是最贵的
+    // 2. 出牌：场上有威胁时下高费解场，否则下能出的最强单位
     const units=ai.hand.map((c,i)=>({id:c.id,i,db:CARD_DB[c.id]}))
-      .filter(x=>x.db&&x.db.type==='unit'&&x.db.cost<=ai.mana)
-      .sort((a,b)=>a.db.cost-b.db.cost);
+      .filter(x=>x.db&&x.db.type==='unit'&&x.db.cost<=ai.mana);
     if(units.length){
-      const p=units[0];ai.mana-=p.db.cost;ai.hand.splice(p.i,1);
+      // 对方场上≥2将时，下最贵的；否则下最便宜的（铺场）
+      let p;
+      if(G.my.board.length>=2){
+        p=units.sort((a,b)=>b.db.cost-a.db.cost)[0];
+      }else{
+        p=units.sort((a,b)=>a.db.cost-b.db.cost)[0];
+      }
+      ai.mana-=p.db.cost;ai.hand.splice(p.i,1);
       ai.board.push({id:p.id,tapped:false,sick:true});
       if(p.db.power==='draw1_etb')drawTo(ai,1);
       if(p.db.power==='heal_both1_etb'){ai.life++;G.my.life++;}
       if(p.db.power==='tongsheng_xiang'&&CARD_DB['ligun']){ai.hand.push('ligun');}
       if(p.db.power==='tongsheng_ligun'&&CARD_DB['xiangchong']){ai.hand.push('xiangchong');}
+      if(p.db.power==='chenggui_etb'){
+        ai.board.push({id:'token_huoqiang',tapped:true,sick:false});
+        ai.board.push({id:'token_huoqiang',tapped:true,sick:false});
+        logMsg('陈规召2火枪兵！');
+      }
       logMsg(`<span style="color:#a080ff">${ai.name}</span> 派出 ${p.db.name}。`);acted=true;continue;
     }
     // 3. 法术/瞬间：优先用有直接收益的（抽牌、回血、伤害、清场），跳过纯防御的
@@ -2155,15 +2167,27 @@ function aiTakeTurn(){
       atk.forEach(c=>c.tapped=true);
       const mine=G.my.board.filter(c=>!c.tapped&&(!c.sick||hasPower(c,'haste')));
       const pairs=[];
-      // 高攻（>=3）直接打玩家，低攻（<3）尝试换杀阻挡者
+      // 高攻（>=3）直接打玩家，低攻（<3）优先杀对方高价值将
       for(const a of [...atk].sort((x,y)=>getAtk(y)-getAtk(x))){
         if(getAtk(a)>=3){
-          pairs.push({a,b:null}); // 高攻直冲玩家
+          // 高攻将：如果对方有能杀掉自己的阻挡者，也可以考虑换杀
+          const killer=mine.find(b=>getAtk(b)>=getAtk(a));
+          if(killer&&getAtk(a)>=getDef(killer)){
+            killer.tapped=true;pairs.push({a,b:killer});mine.splice(mine.indexOf(killer),1);
+          }else{
+            pairs.push({a,b:null}); // 直冲玩家
+          }
         }else{
-          // 低攻找能杀死的阻挡者
-          const can=mine.find(b=>getAtk(a)>=getDef(b)&&getDef(b)>=getAtk(a));
-          if(can){can.tapped=true;pairs.push({a,b:can});mine.splice(mine.indexOf(can),1);}
-          else pairs.push({a,b:null});
+          // 低攻将：优先杀对方高攻将（>=3），杀不掉就打脸
+          const highTarget=mine.find(b=>getAtk(b)>=3&&getAtk(a)>=getDef(b));
+          if(highTarget){
+            highTarget.tapped=true;pairs.push({a,b:highTarget});mine.splice(mine.indexOf(highTarget),1);
+          }else{
+            // 杀不掉高攻将，找能交换的中等将
+            const can=mine.find(b=>getAtk(a)>=getDef(b)&&getDef(b)>=getAtk(a));
+            if(can){can.tapped=true;pairs.push({a,b:can});mine.splice(mine.indexOf(can),1);}
+            else pairs.push({a,b:null}); // 打脸
+          }
         }
       }
       for(const {a,b} of pairs){
