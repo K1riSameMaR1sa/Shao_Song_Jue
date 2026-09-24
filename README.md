@@ -2,7 +2,7 @@
 
 基于穿越小说《绍宋》（榴弹怕水 著）的网页卡牌对战游戏，规则类似万智牌（MTG），单 HTML 文件自包含。
 
-## 当前版本 v3.1.0-beta
+## 当前版本 v4.0.0-beta
 
 ### 已实现功能
 - **AI 对战**：贪心出牌 + 自动选阻挡
@@ -54,6 +54,7 @@
 穿喉（死触）、敏捷（突击）、死守/铁壁（警戒）、先发、破阵（践踏）、抚绥（死连）、庙算、营田、血战、纵横、勤王、坚壁、殉国、同生、共死、回光、单臂擒贼、舍命、变身体
 
 ### 更新归档
+- **v4.0.0-beta**：后宫粉新增7张牌（吴皇后/刘贵妃/张婕妤/朱贵妃/凤冠霞帔/六宫粉黛/红颜祸水）；新增红粉双色预组（宋+后宫）；buildDeck支持双色组牌
 - **v3.1.0-beta**：预组60张标准赛制+mana曲线优化；新增会宁府/黄龙府/大理城/天龙寺/慈宁宫/浣衣院；查看套牌界面展示六阵营预组；AI优化（低费优先、法术优先级、高攻打脸）；梁山108将全加入；项充李衮同生共死、杨雄石秀变身、林冲回光、武松单臂擒贼；连环马/钩镰枪瞬间牌；梁山泊/聚义堂专属地
 - **v3.0.0-beta**：六阵营颜色轮系统；崇学/崇教d20判定牌；Counter牌（沉默/封驳/断章）；完整MTG 12阶段流；d20猜先/调度/录像回放；手机端适配
 - **v2.0-beta**：宋金夏理四阵营基础卡牌；AI对战/自定义牌组；关键词系统（穿喉/敏捷/铁壁/先发等）
@@ -76,7 +77,7 @@
 
 A browser-based trading card game (TCG) set during the Southern Song dynasty, based on the time-travel novel *Shao Song* by Liu Dan Pa Shui. Rules inspired by Magic: The Gathering. Single self-contained HTML file.
 
-## Version v3.1.0-beta
+## Version v4.0.0-beta
 
 ### Features
 - **AI Battles**: Greedy play + auto-blocking
