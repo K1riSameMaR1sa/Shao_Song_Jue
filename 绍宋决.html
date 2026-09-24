@@ -824,7 +824,7 @@ const CARD_DB = {
   likui:   {name:"李逵", type:"unit", faction:"neutral", cost:3, atk:6, def:3, text:"黑旋风：敏捷；攻宋将+1", power:"haste;counter_song"},
   huarong: {name:"花荣", type:"unit", faction:"neutral", cost:3, atk:3, def:2, text:"小李广：穿喉；敏捷", power:"deathtouch;haste"},
   daizong: {name:"戴宗", type:"unit", faction:"neutral", cost:2, atk:1, def:2, text:"神行太保：敏捷；登场抽1", power:"haste;draw1_etb"},
-  gongsunsheng:{name:"公孙胜",type:"unit",faction:"neutral",cost:3,atk:2,def:3,text:"入云龙：登场康对手1法术", power:"counter_etb"},
+  gongsunsheng:{name:"公孙胜",type:"unit",faction:"neutral",cost:3,atk:3,def:2,text:"入云龙：五雷正法（进场掷d6：3-5对手受2伤，6对手受4伤+敌将各受2伤）；呼风唤雨（横置：本回合中立将敏捷）", power:"wulei_etb;hufeng_tap"},
   guansheng:{name:"关胜",type:"unit",faction:"neutral",cost:5,atk:6,def:6,text:"大刀：武圣光环（中立将+1/+0）；铁壁；穿喉", power:"ward;deathtouch"},
   qinming: {name:"秦明", type:"unit", faction:"neutral", cost:4, atk:6, def:4, text:"霹雳火：敏捷；先发", power:"haste;first_strike"},
   huyanzhuo:{name:"呼延灼",type:"unit",faction:"neutral",cost:4,atk:5,def:5,text:"双鞭：铁壁；敏捷", power:"ward;haste"},
@@ -1478,6 +1478,12 @@ function playCard(handIdx,targetIdx){
     if(db.power==='token_nü_etb'){G.my.board.push({id:'token_nü',tapped:false,sick:true});logMsg(`「${db.name}」召来1女奴！`);}
     if(db.power==='tongsheng_xiang'){if(CARD_DB['ligun'])G.my.hand.push('ligun');logMsg('同生：李衮入手牌。');}
     if(db.power==='tongsheng_ligun'){if(CARD_DB['xiangchong'])G.my.hand.push('xiangchong');logMsg('同生：项充入手牌。');}
+    if(db.power==='wulei_etb'){
+      const roll=Math.floor(Math.random()*6)+1;
+      if(roll>=3&&roll<=5){G.enemy.life-=2;logMsg(`五雷正法掷${roll}：紫雷劈顶，对手-2威望！`);}
+      else if(roll===6){G.enemy.life-=4;G.enemy.board.forEach(c=>{c.damageTaken=(c.damageTaken||0)+2;});logMsg(`五雷正法掷6：五雷轰顶！对手-4威望，所有敌将受2伤！`);}
+      else logMsg(`五雷正法掷${roll}：天雷未响。`);
+    }
     if(db.power==='shaoyong_etb'){
       const roll=Math.floor(Math.random()*20)+1;
       if(roll<=10){drawTo(G.my,1);logMsg(`邵雍梅花易数掷${roll}：抽1。`);}
