@@ -804,8 +804,8 @@ const CARD_DB = {
   fanrui:  {name:"樊瑞", type:"unit", faction:"neutral", cost:3, atk:2, def:2, text:"混世魔王", power:null},
   kongming: {name:"孔明", type:"unit", faction:"neutral", cost:1, atk:1, def:1, text:"毛头星", power:null},
   kongliang:{name:"孔亮",type:"unit",faction:"neutral",cost:1,atk:1,def:1,text:"独火星", power:null},
-  xiangchong:{name:"项充",type:"unit",faction:"neutral",cost:2,atk:2,def:2,text:"八臂哪吒", power:null},
-  ligun:   {name:"李衮", type:"unit", faction:"neutral", cost:2, atk:2, def:2, text:"飞天大圣", power:null},
+  xiangchong:{name:"项充",type:"unit",faction:"neutral",cost:2,atk:2,def:2,text:"八臂哪吒：同生（进场找李衮入手牌）；共死（同场时两人分摊伤害）", power:"tongsheng_xiang"},
+  ligun:   {name:"李衮", type:"unit", faction:"neutral", cost:2, atk:2, def:2, text:"飞天大圣：同生（进场找项充入手牌）；共死（同场时两人分摊伤害）", power:"tongsheng_ligun"},
   jindajian:{name:"金大坚",type:"unit",faction:"neutral",cost:1,atk:0,def:2,text:"玉臂匠", power:null},
   malin:   {name:"马麟", type:"unit", faction:"neutral", cost:2, atk:2, def:2, text:"铁笛仙", power:null},
   tongwei: {name:"童威", type:"unit", faction:"neutral", cost:1, atk:1, def:1, text:"出洞蛟", power:null},
@@ -1347,6 +1347,8 @@ function playCard(handIdx,targetIdx){
     if(db.power==='token_etb_archer'){G.my.board.push({id:'token_archer',tapped:false,sick:true});logMsg(`「${db.name}」召来弓箭手！`);}
     if(db.power==='token_minfu_etb'){G.my.board.push({id:'token_minfu',tapped:false,sick:true});G.my.board.push({id:'token_minfu',tapped:false,sick:true});logMsg(`「${db.name}」召来2民夫！`);}
     if(db.power==='token_nü_etb'){G.my.board.push({id:'token_nü',tapped:false,sick:true});logMsg(`「${db.name}」召来1女奴！`);}
+    if(db.power==='tongsheng_xiang'){G.my.hand.push('ligun');logMsg('同生：李衮入手牌。');}
+    if(db.power==='tongsheng_ligun'){G.my.hand.push('xiangchong');logMsg('同生：项充入手牌。');}
     if(db.power==='shaoyong_etb'){
       const roll=Math.floor(Math.random()*20)+1;
       if(roll<=10){drawTo(G.my,1);logMsg(`邵雍梅花易数掷${roll}：抽1。`);}
@@ -1855,7 +1857,24 @@ function dealCombat(a,b){
   if(b){
     let aAtk=getAtk(a)+atkBonus;
     if(a.deathtouch||hasPower(a,'deathtouch'))b.damageTaken=99;
-    else b.damageTaken=(b.damageTaken||0)+aAtk;
+    else{
+      // 共死：项充李衮同场时伤害分摊
+      const pairIds=['xiangchong','ligun'];
+      if(pairIds.includes(b.id)){
+        const otherId=b.id==='xiangchong'?'ligun':'xiangchong';
+        const other=G.enemy.board.find(c=>c.id===otherId);
+        if(other){
+          const half=Math.floor(aAtk/2);
+          b.damageTaken=(b.damageTaken||0)+half;
+          other.damageTaken=(other.damageTaken||0)+(aAtk-half);
+          logMsg(`共死：项充李衮分摊${aAtk}伤害。`);
+        }else{
+          b.damageTaken=(b.damageTaken||0)+aAtk;
+        }
+      }else{
+        b.damageTaken=(b.damageTaken||0)+aAtk;
+      }
+    }
     if(CARD_DB[a.id].power==='lifelink'){G.my.life+=aAtk;logMsg(`抚绥，+${aAtk}威望。`);}
     // 先发：若能杀死对方，对方不能反伤
     const willKill=(b.damageTaken||0)>=getDef(b);
