@@ -2259,19 +2259,18 @@ function buildFactionGrid(){
     dali:'紫 · 蛊毒削弱，巫蛊debuff，控制流',
     neutral:'蓝 · 梁山聚义，搭档检索，连环爆发',
     pink:'粉 · 后宫斡旋，返照牵制，辅助全场',
-    neutral_pink:'蓝粉 · 梁山+后宫，辅助控场爆发',
     song_pink:'红粉 · 宋后宫双色，士气+牵制控制',
   };
   grid.innerHTML=Object.entries(FACTIONS).filter(([k])=>['song','jin','xixia','dali','neutral','pink'].includes(k)).map(([k,f])=>{
     return `<div class="faction-card f-${k}" onclick="pickFaction('${k}')"><h3>${f.name}</h3><p>${descs[k]||''}</p></div>`;
-  }).join('')+`<div class="faction-card" onclick="pickFaction('neutral_pink')" style="background:linear-gradient(135deg,#2980b9,#e91e63)"><h3>蓝粉双色</h3><p>梁山+后宫，辅助控场爆发</p></div>`+`<div class="faction-card" onclick="pickFaction('song_pink')" style="background:linear-gradient(135deg,#c0392b,#c97b8a)"><h3>红粉双色</h3><p>宋后宫：士气+牵制</p></div>`;
+  }).join('')+`<div class="faction-card" onclick="pickFaction('song_pink')" style="background:linear-gradient(135deg,#c0392b,#c97b8a)"><h3>红粉双色</h3><p>宋后宫：士气+牵制</p></div>`;
 }
 let pendingFactionChoice='ai';
 function showFactionSelect(){pendingFactionChoice='ai';buildFactionGrid();showScreen('faction-screen');}
 function showDeckPreview(){
-  const factions=['song','jin','xixia','dali','neutral','pink'];
-  const colors={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e63'};
-  const names={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立梁山（蓝）',pink:'后宫（粉）'};
+  const factions=['song','jin','xixia','dali','neutral','pink','song_pink'];
+  const colors={song:'#c0392b',jin:'#d4a017',xixia:'#27ae60',dali:'#8e44ad',neutral:'#2980b9',pink:'#e91e63',song_pink:'linear-gradient(90deg,#c0392b,#c97b8a)'};
+  const names={song:'宋（红）',jin:'金（金黄）',xixia:'西夏（绿）',dali:'大理（紫）',neutral:'中立梁山（蓝）',pink:'后宫（粉）',song_pink:'红粉双色（宋+后宫）'};
   let html='';
   factions.forEach(f=>{
     const deck=buildDeck(f);
