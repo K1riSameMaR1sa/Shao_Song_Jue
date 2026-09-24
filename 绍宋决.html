@@ -497,7 +497,7 @@ const CARD_DB = {
   yangyizhong:{name:"杨沂中",type:"unit",faction:"song",cost:2,atk:2,def:2,text:"御前班直：铁壁",power:"ward"},
   wangde:    {name:"王德", type:"unit", faction:"song", cost:3, atk:3, def:2, text:"王夜叉：敏捷", power:"haste"},
   liqiong:   {name:"郦琼", type:"unit", faction:"jin", cost:2, atk:2, def:2, text:"宋降将：铁壁", power:"ward"},
-  zongze:    {name:"宗泽", type:"unit", faction:"song", cost:5, atk:3, def:6, text:"东京留守：宋将+0/+1", power:"lord_tough"},
+  zongze:    {name:"宗泽", type:"unit", faction:"song", cost:5, atk:3, def:6, text:"东京留守：宋将+0/+1；登场生2民夫", power:"lord_tough;token_minfu_etb"},
   ligang:    {name:"李纲", type:"unit", faction:"song", cost:4, atk:2, def:5, text:"主战旗帜：宋将攻击+1", power:"song_attack_boost"},
   chenggui:  {name:"陈规", type:"unit", faction:"song", cost:2, atk:0, def:5, text:"守城专家：铁壁", power:"ward"},
   liuqi:     {name:"刘錡", type:"unit", faction:"song", cost:3, atk:3, def:3, text:"顺昌之威：先发；攻金将+1", power:"first_strike;counter_jin"},
@@ -580,6 +580,8 @@ const CARD_DB = {
   zhouyu:    {name:"周瑜纶巾", type:"sorcery", faction:"song", cost:2, text:"名品：一个将+1/+1，获得先发", power:"buff_one_1_1_first"},
   qimen:     {name:"诸葛奇门", type:"sorcery", faction:"neutral", cost:4, text:"名品：对手下回合不能重置地（寸步难行）", power:"qimen_etb"},
   meihua:    {name:"梅花易数", type:"sorcery", faction:"song", cost:2, text:"名品：掷d20，1-10抽2，11-20看对手手牌", power:"meihua_etb"},
+  huanqing:  {name:"太平合欢宴",type:"sorcery",faction:"pink",cost:3,text:"名品：双方各生2个1/1衍生物，双方各回3血", power:"banquet_etb"},
+  haishang:  {name:"海上之盟",type:"sorcery",faction:"neutral",cost:2,text:"名品：双方各抽2牌，宋方生1民夫，金方生1俘虏", power:"alliance_etb"},
   moyouxu:   {name:"莫须有", type:"instant", faction:"neutral", cost:2, text:"瞬间：消灭一个攻≤2的敌将", power:"kill_small"},
   qingjunce: {name:"清君侧", type:"instant", faction:"neutral", cost:2, text:"瞬间：对手威望-3", power:"damage_player3"},
   luojing:   {name:"落井", type:"sorcery", faction:"neutral", cost:1, text:"牺牲我方1将，抽3", power:"sac_draw3"},
@@ -672,7 +674,7 @@ const CARD_DB = {
   /* ===== 徽钦二帝与北狩宗室（历史包袱牌） ===== */
   zhaoji:    {name:"宋徽宗赵佶",type:"unit",faction:"song",cost:3,atk:0,def:3,text:"道君：在场时每回合-1粮（北狩之辱）", power:"tax_drain"},
   zhaohuan:  {name:"宋钦宗赵桓",type:"unit",faction:"song",cost:2,atk:0,def:2,text:"懦弱：不能攻击", power:"cant_attack"},
-  weixianfei:{name:"韦贤妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"显仁太后：横置产1粮", power:"mana_dork"},
+  weixianfei:{name:"韦贤妃",type:"unit",faction:"pink",cost:2,atk:0,def:2,text:"显仁太后：横置产1粮；登场生1女奴", power:"mana_dork;token_nü_etb"},
   xingbingyi:{name:"邢秉懿",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"嘉国夫人：宋将+0/+1", power:"lord_tough_minor"},
   jiangzuifei:{name:"姜醉媚",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"返照：横置将对手1将弹回手牌", power:"bounce_on_tap"},
   tianchunluo:{name:"田春罗",type:"unit",faction:"pink",cost:1,atk:0,def:1,text:"命令：登场令对手弃1牌", power:"opp_discard_etb"},
@@ -733,6 +735,10 @@ const CARD_DB = {
   token_ax:  {name:"刀斧手",type:"unit",faction:"neutral",cost:0,atk:2,def:3,text:"重步", power:null, isToken:true},
   token_archer:{name:"弓箭手",type:"unit",faction:"neutral",cost:0,atk:1,def:2,text:"穿喉", power:"deathtouch", isToken:true},
   token_guard:{name:"亲兵",type:"unit",faction:"neutral",cost:0,atk:0,def:3,text:"铁壁", power:"ward", isToken:true},
+  token_minfu:{name:"民夫",type:"unit",faction:"song",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
+  token_lu:  {name:"俘虏",type:"unit",faction:"jin",cost:0,atk:0,def:1,text:"横置产1粮", power:"mana_dork", isToken:true},
+  token_slave:{name:"奴隶",type:"unit",faction:"jin",cost:0,atk:1,def:1,text:"劳作", power:null, isToken:true},
+  token_nü:  {name:"女奴",type:"unit",faction:"pink",cost:0,atk:0,def:1,text:"横置时对手-1威望", power:"nü_on_tap", isToken:true},
 
   /* ===== 州府/地 ===== */
   kaiifeng:  {name:"开封府", type:"land", faction:"song", text:"大宋都城：产1粮"},
@@ -1223,6 +1229,8 @@ function playCard(handIdx,targetIdx){
     if(db.power==='token_etb_ax'){G.my.board.push({id:'token_ax',tapped:false,sick:true});logMsg(`「${db.name}」召来刀斧手！`);}
     if(db.power==='token_etb_cav'||db.power==='haste_token_cav'){G.my.board.push({id:'token_cav',tapped:false,sick:true});logMsg(`「${db.name}」召来骑兵！`);}
     if(db.power==='token_etb_archer'){G.my.board.push({id:'token_archer',tapped:false,sick:true});logMsg(`「${db.name}」召来弓箭手！`);}
+    if(db.power==='token_minfu_etb'){G.my.board.push({id:'token_minfu',tapped:false,sick:true});G.my.board.push({id:'token_minfu',tapped:false,sick:true});logMsg(`「${db.name}」召来2民夫！`);}
+    if(db.power==='token_nü_etb'){G.my.board.push({id:'token_nü',tapped:false,sick:true});logMsg(`「${db.name}」召来1女奴！`);}
     if(db.power==='shaoyong_etb'){
       const roll=Math.floor(Math.random()*20)+1;
       if(roll<=10){drawTo(G.my,1);logMsg(`邵雍梅花易数掷${roll}：抽1。`);}
@@ -1318,6 +1326,20 @@ function resolveSpell(power,ti){
       else{logMsg(`梅花易数掷${roll}：对手手牌${opp.hand.length}张。`);}
       break;
     }
+    case 'banquet_etb':
+      me.board.push({id:'token_slave',tapped:false,sick:true});
+      me.board.push({id:'token_slave',tapped:false,sick:true});
+      opp.board.push({id:'token_slave',tapped:false,sick:true});
+      opp.board.push({id:'token_slave',tapped:false,sick:true});
+      me.life+=3;opp.life+=3;
+      logMsg('太平合欢宴：双方各生2奴隶，各回3血。');
+      break;
+    case 'alliance_etb':
+      drawTo(me,2);drawTo(opp,2);
+      me.board.push({id:'token_minfu',tapped:false,sick:true});
+      opp.board.push({id:'token_lu',tapped:false,sick:true});
+      logMsg('海上之盟：双方各抽2，宋生民夫，金生俘虏。');
+      break;
     case 'look_hand_draw1':drawTo(me,1);logMsg(`左传：抽1，对手手牌${opp.hand.length}张。`);break;
     case 'heal5':me.life+=5;logMsg('威望+5。');break;
     case 'damage_player3':opp.life-=3;logMsg(`清君侧，对手-3威望！`);break;
