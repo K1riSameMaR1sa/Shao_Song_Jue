@@ -743,7 +743,7 @@ const CARD_DB = {
   songjiang: {name:"宋江", type:"unit", faction:"neutral", cost:4, atk:2, def:5, text:"及时雨：登场抽1；在场时中立将+0/+1", power:"songjiang_etb"},
   lujunyi: {name:"卢俊义", type:"unit", faction:"neutral", cost:6, atk:7, def:6, text:"玉麒麟：单挑王（战斗+2/+0）；先发；穿喉", power:"first_strike;deathtouch"},
   wuyong:  {name:"吴用", type:"unit", faction:"neutral", cost:2, atk:0, def:4, text:"智多星：登场看对手手牌", power:"peek_etb"},
-  linchong:{name:"林冲", type:"unit", faction:"neutral", cost:4, atk:6, def:5, text:"豹子头：先发；穿喉；铁壁", power:"first_strike;ward"},
+  linchong:{name:"林冲", type:"unit", faction:"neutral", cost:4, atk:6, def:5, text:"豹子头：先发；穿喉；铁壁；回光（阵亡时对所有敌将造6伤）", power:"first_strike;ward;deathtouch;huiguang"},
   lushisen:{name:"鲁智深",type:"unit",faction:"neutral",cost:4,atk:5,def:6,text:"花和尚：铁壁；穿喉", power:"ward;deathtouch"},
   wusong:  {name:"武松", type:"unit", faction:"neutral", cost:3, atk:5, def:4, text:"行者：敏捷；先发", power:"haste;first_strike"},
   yangzhi: {name:"杨志", type:"unit", faction:"neutral", cost:3, atk:3, def:3, text:"青面兽：铁壁", power:"ward"},
@@ -1636,6 +1636,7 @@ function cleanupDead(){
         if(pw==='death_damage1'){opp.life-=1;logMsg(`${CARD_DB[c.id].name} 殉节，对手-1威望！`);}
         if(pw==='death_draw1'){drawTo(p,1);logMsg(`${CARD_DB[c.id].name} 死后留书，抽1。`);}
         if(c.id==='token_nü'){opp.life-=2;logMsg(`女奴惨死，宋主-2威望（靖康之耻）。`);}
+        if(hasPower(c,'huiguang')){opp.board.forEach(t=>{t.damageTaken=(t.damageTaken||0)+6;});logMsg(`林冲回光返照！对所有敌将造6伤（同归于尽）。`);}
       }
       else alive.push(c);
     });
