@@ -2,7 +2,7 @@
 
 基于穿越小说《绍宋》（榴弹怕水 著）的网页卡牌对战游戏，规则类似万智牌（MTG），单 HTML 文件自包含。
 
-## 当前版本 v3.3.1-beta
+## 当前版本 v3.3.2-beta
 
 ### 已实现功能
 - **AI 对战**：贪心出牌 + 自动选阻挡
@@ -54,6 +54,7 @@
 穿喉（死触）、敏捷（突击）、死守/铁壁（警戒）、先发、破阵（践踏）、抚绥（死连）、庙算、营田、血战、纵横、勤王、坚壁、殉国、同生、共死、回光、单臂擒贼、舍命、变身体
 
 ### 更新归档
+- **v3.3.2-beta**：优化主菜单与房间操作按钮的尺寸、字距和窄屏布局；统一战斗操作按钮的最小触控高度；补充键盘焦点提示，并支持窄屏下滚动浏览完整主菜单
 - **v3.3.1-beta**：套牌查看界面重做（mana曲线图+类型统计+按费用分组+15张备牌+左右切换）；后宫新增7张牌；红粉双色预组；公孙胜重做（五雷正法d6）；双色地德寿宫+找地地临安御街；图鉴模糊搜索+类别颜色分组+三列分页；详情弹窗竖版卡面+历史摘录；60+张卡补全诗句摘录；后妃加谥号
 - **v3.2.0-beta**：预组60张标准赛制+mana曲线优化；新增会宁府/黄龙府/大理城/天龙寺/慈宁宫/浣衣院；查看套牌界面展示六阵营预组；AI优化；梁山108将全加入；项充李衮同生共死、杨雄石秀变身、林冲回光、武松单臂擒贼；连环马/钩镰枪瞬间牌；梁山泊/聚义堂专属地
 - **v3.1.0-beta**：预组60张标准赛制+mana曲线优化；新增会宁府/黄龙府/大理城/天龙寺/慈宁宫/浣衣院；查看套牌界面展示六阵营预组；梁山108将全加入；项充李衮同生共死、杨雄石秀变身、林冲回光、武松单臂擒贼；连环马/钩镰枪瞬间牌；梁山泊/聚义堂专属地
@@ -78,7 +79,7 @@
 
 A browser-based trading card game (TCG) set during the Southern Song dynasty, based on the time-travel novel *Shao Song* by Liu Dan Pa Shui. Rules inspired by Magic: The Gathering. Single self-contained HTML file.
 
-## Version v3.3.1-beta
+## Version v3.3.2-beta
 
 ### Features
 - **AI Battles**: Greedy play + auto-blocking
@@ -91,6 +92,7 @@ A browser-based trading card game (TCG) set during the Southern Song dynasty, ba
 - **Replay System**: Last 20 matches in localStorage
 - **Card Codex**: Filter by faction / type / token
 - **Mobile Responsive**: Scaled cards, horizontal hand scroll, long-press for details
+- **Responsive Controls**: Consistent menu button sizing, touch-friendly battle actions, and visible keyboard focus
 - **Preset Deck Preview**: Browse all 6 factions' cards, click for details
 - **6 Factions**: Song / Jin / Xixia / Dali / Neutral Liangshan / Harem
 
@@ -128,6 +130,9 @@ A browser-based trading card game (TCG) set during the Southern Song dynasty, ba
 
 ### Keywords
 Deathtouch, Haste, Ward, First Strike, Trample, Lifelink, Ramp, Bloodbath, Diplomacy, Relief, Fortify, Martyrdom, Partner, Shared Death, Flashback, Single-Arm Capture, Fading, Transform
+
+### Update History
+- **v3.3.2-beta**: Refined menu and room button sizing and narrow-screen layout; standardized minimum touch heights for battle controls; added visible keyboard focus and scrolling for the full menu on short screens
 
 ## Run Locally
 Open `绍宋决.html` in any browser. No server needed.

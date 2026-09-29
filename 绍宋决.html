@@ -24,17 +24,19 @@
 html,body{height:100%}
 body{font-family:'Noto Serif SC',serif;background:radial-gradient(ellipse at 20% 10%,rgba(139,26,26,.08),transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(26,26,46,.08),transparent 50%),var(--paper);color:var(--ink);overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
+button:focus-visible{outline:3px solid var(--tie);outline-offset:3px}
 ::-webkit-scrollbar{height:8px;width:8px}
 ::-webkit-scrollbar-thumb{background:var(--tie);border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .screen.active{display:flex}
 
-#menu-screen{background:linear-gradient(rgba(240,228,200,.92),rgba(240,228,200,.96)),repeating-linear-gradient(45deg,transparent 0 20px,rgba(139,26,26,.03) 20px 40px)}
+#menu-screen{overflow-y:auto;justify-content:safe center;background:linear-gradient(rgba(240,228,200,.92),rgba(240,228,200,.96)),repeating-linear-gradient(45deg,transparent 0 20px,rgba(139,26,26,.03) 20px 40px)}
 .title-seal{font-size:88px;font-weight:900;color:var(--zhu);letter-spacing:12px;text-indent:12px;text-shadow:3px 3px 0 var(--paper-deep),6px 6px 0 rgba(139,26,26,.15);margin-bottom:8px}
 .subtitle{font-size:18px;color:var(--ink-soft);letter-spacing:6px;margin-bottom:36px}
-.menu-buttons{display:flex;flex-direction:column;gap:14px;width:340px}
-.menu-btn{padding:14px 24px;font-size:17px;letter-spacing:4px;background:var(--zhu);color:var(--paper);border:2px solid var(--zhu-deep);box-shadow:var(--shadow);transition:transform .15s}
+.menu-buttons{display:flex;flex-direction:column;gap:10px;width:min(360px,calc(100vw - 40px))}
+.menu-btn{padding:10px 18px;font-size:16px;line-height:1.35;letter-spacing:2px;background:var(--zhu);color:var(--paper);border:2px solid var(--zhu-deep);box-shadow:var(--shadow);transition:transform .15s}
+.menu-buttons>.menu-btn,.room-panel>.menu-btn{min-height:48px}
 .menu-btn:hover{transform:translateY(-2px)}
 .menu-btn.secondary{background:var(--ink);border-color:var(--ink-soft)}
 .menu-btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
@@ -54,7 +56,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 .room-panel h2{font-size:22px;letter-spacing:4px;color:var(--zhu);text-align:center}
 .room-panel input{padding:12px;font-size:20px;text-align:center;letter-spacing:8px;font-family:inherit;border:2px solid var(--ink);background:var(--paper)}
 .room-row{display:flex;gap:12px}
-.room-row button{flex:1;padding:12px;font-size:14px;letter-spacing:2px}
+.room-row button{flex:1;min-width:0;min-height:46px;padding:10px 12px;font-size:14px;letter-spacing:1px}
 
 #game-screen{padding:0}
 .battlefield{width:100%;max-width:1400px;height:100%;display:grid;grid-template-rows:auto auto auto auto auto auto auto;gap:5px;padding:6px}
@@ -102,7 +104,8 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 
 .console{display:flex;gap:10px;align-items:center;justify-content:center;padding:8px;background:var(--ink);color:var(--paper);border-radius:3px;flex-wrap:wrap}
 .turn-label{font-size:14px;letter-spacing:3px}
-.action-btn{padding:10px 22px;font-size:14px;font-weight:700;letter-spacing:3px;background:var(--tie);color:var(--ink);border:2px solid var(--zhu)}
+.action-btn{padding:8px 16px;font-size:13px;font-weight:700;line-height:1.3;letter-spacing:1px;background:var(--tie);color:var(--ink);border:2px solid var(--zhu)}
+.console .action-btn,#mulligan-bar .action-btn{min-height:44px}
 .action-btn:hover{background:var(--tie-soft)}
 .action-btn:disabled{opacity:.4;cursor:not-allowed}
 .action-btn.danger{background:var(--zhu);color:var(--paper)}
@@ -124,7 +127,9 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
   .card-name{font-size:9px}
   .card-text{font-size:7px}
   .zone-row{min-height:64px}.hand-row{min-height:92px}
-  .menu-btn{padding:12px 16px;font-size:14px;width:100%}
+  .menu-buttons{width:min(420px,calc(100vw - 32px));gap:8px}
+  .menu-buttons>.menu-btn,.room-panel>.menu-btn{min-height:46px;padding:10px 12px;font-size:14px;letter-spacing:1px;width:100%}
+  .room-panel .room-row>.menu-btn{width:auto}
   .action-btn{padding:8px 12px;font-size:12px}
   .hand-row{overflow-x:auto;flex-wrap:nowrap}
   .hand-row .card-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -133,17 +138,17 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
   .player-bar{padding:6px 10px;font-size:12px}
   #log-panel{font-size:10px}
   .version-tag{position:static;margin-top:24px;font-size:10px}
-  .menu-buttons{width:90%;gap:10px}
   .subtitle{margin-bottom:20px;font-size:14px}
   .battlefield{gap:4px}
-  .console{flex-wrap:wrap;gap:6px;padding:6px}
-  .console .action-btn{padding:6px 10px;font-size:11px}
+  .console{flex-wrap:wrap;gap:6px;padding:8px}
+  .console .action-btn{min-height:44px;padding:8px 10px;font-size:12px;letter-spacing:.5px}
   .zone-label{font-size:10px;min-width:32px}
   .card-row{gap:4px}
   .player-stats{font-size:11px;gap:8px}
 }
 @media (max-width:500px){
   .title-seal{font-size:36px;letter-spacing:4px}
+  .menu-buttons>.menu-btn{padding:9px 10px}
   .card{width:52px;height:72px}
   .hand-row .card{width:64px;height:88px}
   .card-name{font-size:8px}
