@@ -2,7 +2,7 @@
 
 A web-based trading card game (TCG) inspired by the novel *Shao Song* (绍宋) by Liudan Pashui (榴弹怕水). Rules are modeled after Magic: The Gathering (MTG). Single self-contained HTML file — no build step, no server needed.
 
-## Current Version v24
+## Current Version v3.3.2-beta
 
 ### Features
 - **AI Opponent**: Greedy play + auto-blocking
@@ -15,6 +15,7 @@ A web-based trading card game (TCG) inspired by the novel *Shao Song* (绍宋) b
 - **Replay System**: Last 20 matches saved to localStorage
 - **Card Codex**: Filter by faction / type / token (Sorcery and Instant separated)
 - **Mobile Responsive**: Scaled cards, horizontal hand scroll, touch-friendly buttons
+- **Responsive Controls**: Refined menu and room button sizing, touch-friendly battle actions, and visible keyboard focus
 
 ### Faction Color Wheel
 | Faction | Color | Trait |
@@ -43,6 +44,19 @@ Deathtouch, Haste, Ward, Vigilance, First Strike, Trample, Lifelink, Tactician, 
 
 ## Running Locally
 Simply open `绍宋决.html` in any modern browser. No server, no installation.
+
+## Development Tests
+The zero-dependency Node.js test tools live in `tools/`. They are for development checks only and are not part of runtime; the game remains a self-contained HTML file.
+
+```bash
+node tools/check.js          # Recommended: run all three checks (exit code 0/1)
+node tools/harness.js        # Run the 30-assertion suite
+node tools/allcards.js       # Try playing every drawable card
+node tools/cssvars.js        # Check that every CSS variable reference is defined
+node tools/harness.js path/to/other.html
+```
+
+`tools/` contains the combined check entry point, assertion suite, per-card play-through, CSS variable checker, and their shared DOM stub. The harness uses Node's `vm` and does not parse `innerHTML`, so it cannot simulate mouse clicks; pure UI interactions still need manual browser testing. See [`tools/README.md`](tools/README.md) for implementation details and trade-offs.
 
 ## Tech Stack
 - Single-file HTML (inline CSS + vanilla JS)

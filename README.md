@@ -64,6 +64,19 @@
 ## 本地运行
 直接用浏览器打开 `绍宋决.html` 即可，无需服务器。
 
+## 开发测试
+仓库提供 `tools/` 下的零依赖 Node.js 测试工具；这些脚本只用于开发检查，不参与游戏运行，游戏本体仍是单文件自包含。
+
+```bash
+node tools/check.js          # 推荐：运行三项检查，全部通过返回 0，失败返回 1
+node tools/harness.js        # 运行 30 项断言
+node tools/allcards.js       # 逐张试跑全部可抽卡
+node tools/cssvars.js        # 检查 CSS 变量引用是否均已定义
+node tools/harness.js path/to/other.html
+```
+
+`tools/` 包含组合入口 `check.js`、断言套件 `harness.js`、逐卡检查 `allcards.js`、CSS 变量检查 `cssvars.js`，以及共享 DOM stub 和说明文档。测试使用 Node `vm` 与 DOM stub，不解析 `innerHTML`，因此不能模拟鼠标点击；纯 UI 交互仍需在浏览器中人工确认。详见 [`tools/README.md`](tools/README.md)。
+
 ## 技术栈
 - 单文件 HTML（内联 CSS + 原生 JS）
 - 无框架、无构建工具
@@ -136,6 +149,19 @@ Deathtouch, Haste, Ward, First Strike, Trample, Lifelink, Ramp, Bloodbath, Diplo
 
 ## Run Locally
 Open `绍宋决.html` in any browser. No server needed.
+
+## Development Tests
+The zero-dependency Node.js test tools live in `tools/`. They are for development checks only and are not part of runtime; the game remains a self-contained HTML file.
+
+```bash
+node tools/check.js          # Recommended: run all three checks (exit code 0/1)
+node tools/harness.js        # Run the 30-assertion suite
+node tools/allcards.js       # Try playing every drawable card
+node tools/cssvars.js        # Check that every CSS variable reference is defined
+node tools/harness.js path/to/other.html
+```
+
+The test harness uses Node's `vm` and a DOM stub. It does not parse `innerHTML` and cannot simulate mouse clicks, so pure UI interactions still need manual browser testing. See [`tools/README.md`](tools/README.md) for implementation details and trade-offs.
 
 ## Tech Stack
 - Single-file HTML (inline CSS + vanilla JS)
