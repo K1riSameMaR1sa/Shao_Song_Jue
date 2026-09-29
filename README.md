@@ -1,6 +1,6 @@
 # 绍宋决 · Shao Song Jue
 
-基于穿越小说《绍宋》（榴弹怕水 著）的网页卡牌对战游戏，规则类似万智牌（MTG），单 HTML 文件自包含。
+基于穿越小说《绍宋》（榴弹怕水 著）的网页卡牌对战游戏，规则类似万智牌（MTG），单 HTML 文件自包含。[Readme.En.md](Shao_Song_Jue/README.en.md)
 
 ## 当前版本 v3.3.2-beta
 
